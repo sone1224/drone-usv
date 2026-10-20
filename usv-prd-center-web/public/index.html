@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>수상드론 what's next</title>
+<meta name="theme-color" content="#0b69a3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 왼쪽 고정 내비 + 오른쪽 작업 영역(앱 셸). 폰에서는 상단 탭바로 접힘. */
+:root{
+  --bg:#eef2f2; --panel:#ffffff; --ink:#13232a; --muted:#56676e; --line:#c9d3d4; --edge:#8a9a9e;
+  --accent:#c4531a; --accent-soft:#fbe9df; --sea:#1d5c70; --tint:#e4ebec; --nav:#0f2a33; --nav-ink:#e6eff0; --nav-muted:#9fb6ba;
+  --f-body:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c171b; --panel:#14232a; --ink:#e2ecee; --muted:#93a6ac; --line:#2a3f46; --edge:#6f878d;
+  --accent:#ff8a4c; --accent-soft:#3a271d; --sea:#62b6cf; --tint:#1b2d34; --nav:#081215; --nav-ink:#e2ecee; --nav-muted:#7f979c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c171b; --panel:#14232a; --ink:#e2ecee; --muted:#93a6ac; --line:#2a3f46; --edge:#6f878d;
+  --accent:#ff8a4c; --accent-soft:#3a271d; --sea:#62b6cf; --tint:#1b2d34; --nav:#081215; --nav-ink:#e2ecee; --nav-muted:#7f979c; color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.55}
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100%}
+nav.side{background:var(--nav);color:var(--nav-ink);padding-block:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;display:flex;flex-direction:column;gap:20px;position:sticky;top:0;height:100vh;box-sizing:border-box}
+.brand{display:grid;gap:2px}
+.brand b{font-size:17px}
+.brand span{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:var(--nav-muted);text-transform:uppercase}
+.navlist{display:flex;flex-direction:column;gap:2px}
+.navlist button{font:inherit;font-size:14px;text-align:left;background:none;border:0;color:var(--nav-muted);padding:9px 10px;border-radius:6px;cursor:pointer;border-left:3px solid transparent}
+.navlist button[aria-current="page"]{color:var(--nav-ink);background:rgba(255,255,255,.07);border-left-color:var(--accent);font-weight:700}
+.navlist button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.side .foot{margin-top:auto;font-size:12px;color:var(--nav-muted)}
+main{padding-block:28px 56px;padding-left:28px;padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px;align-content:start;min-width:0}
+header.top{display:grid;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--sea);text-transform:uppercase}
+h1{margin:0;font-size:clamp(22px,3.4vw,30px);text-wrap:balance}
+h2{margin:0;font-size:19px;text-wrap:balance}
+h3{margin:0;font-size:15px}
+p{margin:0}
+.lead{color:var(--muted);max-width:72ch}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:2px}
+.kpi b{font-family:var(--f-mono);font-size:26px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;display:grid;gap:12px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.models{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.model{border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:6px;background:var(--panel)}
+.model.mil{border-color:var(--accent)}
+.model .tag{font-family:var(--f-mono);font-size:12px;color:var(--sea)}
+.model.mil .tag{color:var(--accent)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+td.id{font-family:var(--f-mono);white-space:nowrap;color:var(--sea)}
+.figbox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:12px}
+.figbox svg{display:block;min-width:700px;width:100%;height:auto}
+.cap{font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;border-radius:999px;padding:2px 10px;background:var(--tint)}
+.chip.core{background:var(--accent-soft);color:var(--ink);border:1px solid var(--accent)}
+.links{display:grid;gap:6px}
+.links a{color:var(--sea)}
+ul.check{margin:0;padding-left:20px;display:grid;gap:4px}
+section[hidden]{display:none!important}
+nav.side{overflow-y:auto}
+.navgrp{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--nav-muted);text-transform:uppercase;padding:14px 10px 4px;opacity:.85}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{font:inherit;text-align:left;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--sea);border-radius:10px;padding:14px 16px;display:grid;gap:4px;cursor:pointer}
+.tile:hover{border-color:var(--sea)}
+.tile b{font-size:15px}
+.tile span{font-size:13px;color:var(--muted)}
+.tile.g1{border-top-color:var(--accent)} .tile.g3{border-top-color:#7a6bb0} .tile.g4{border-top-color:var(--edge)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;background:var(--panel);color:var(--muted);border:0;padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.pcard{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden;display:grid;grid-template-rows:auto 1fr;min-width:0}
+.pcard.ours{border-color:var(--accent)}
+.pfig{position:relative;aspect-ratio:2/1;background:var(--tint);display:grid;place-items:center;overflow:hidden}
+.pfig img{width:100%;height:100%;object-fit:cover;display:block}
+.pfig svg{width:92%;height:auto}
+.pfig .cr{position:absolute;right:6px;bottom:4px;font-size:10px;color:var(--muted);background:var(--panel);border-radius:3px;padding:0 4px;opacity:.9}
+.pbody{padding:12px 14px;display:grid;gap:6px;align-content:start}
+.pbody .t{font-weight:700;font-size:15px}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px;margin:0}
+.spec dt{color:var(--muted)} .spec dd{margin:0;overflow-wrap:anywhere}
+svg .sea{fill:var(--sea);opacity:.18} svg .hull{fill:var(--panel);stroke:var(--ink);stroke-width:1.6} svg .hl{fill:var(--accent)} svg .dk{fill:var(--edge)}
+.lawgrid{display:grid;gap:14px}
+.lawcard{border:1px solid var(--line);border-left:4px solid var(--sea);border-radius:8px;padding:12px 14px;display:grid;gap:4px;background:var(--panel)}
+/* 과제 모니터링·제안서 */
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer;text-decoration:none}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn[disabled]{opacity:.5;cursor:default}
+select,input[type=search]{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 8px;max-width:100%}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#grid th{cursor:pointer;user-select:none}
+#grid th[aria-sort="descending"]::after{content:" ▼"} #grid th[aria-sort="ascending"]::after{content:" ▲"}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td a{color:var(--sea)}
+.fit{font-family:var(--f-mono);font-weight:700}
+.fit.hi{color:var(--accent)}
+.pill{display:inline-block;font-size:12px;border-radius:4px;padding:1px 8px;background:var(--tint);white-space:nowrap}
+.st-open{background:#2e7d4f;color:#fff} .st-soon{background:#9a5c00;color:#fff} .st-closed{background:#7a868b;color:#fff} .st-ref{background:var(--sea);color:var(--bg)}
+.cards{display:grid;gap:10px}
+.card{border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;gap:6px;min-width:0;background:var(--panel)}
+.card.top{border-color:var(--accent);background:var(--accent-soft)}
+.card .t{font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.card .m{font-size:13px;color:var(--muted)}
+textarea{width:100%;box-sizing:border-box;min-height:480px;font:14px/1.6 var(--f-body);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;resize:vertical}
+textarea.short{min-height:220px}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:20px;color:var(--muted);text-align:center}
+.status{font-size:13px;color:var(--sea);min-height:1.2em}
+.badge{font-family:var(--f-mono);font-size:11px;background:var(--accent);color:#fff;border-radius:999px;padding:0 7px;margin-left:6px}
+/* 운용 시뮬레이터 */
+.scgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.sc{border:1px solid var(--line);border-top:4px solid var(--sea);border-radius:10px;padding:12px 14px;display:grid;gap:6px;align-content:start;background:var(--panel)}
+.sc .t{font-weight:700;font-size:15px}
+.sc .row{margin-top:2px}
+.res-pass{background:#2e7d4f;color:#fff} .res-fail{background:#b3261e;color:#fff} .res-none{background:var(--tint);color:var(--muted)}
+#sim-frame iframe{display:block;width:100%;height:min(82vh,860px);border:1px solid var(--line);border-radius:8px;background:#0d1117}
+#sim-runs tr.run{cursor:pointer}
+#sim-runs tr.log td{background:var(--tint);font-family:var(--f-mono);font-size:12px;white-space:pre-wrap}
+/* SVG 공통 클래스 — 테마 토큰을 따른다 */
+svg .tx{fill:var(--ink);font-family:var(--f-body)}
+svg .tq{fill:var(--muted);font-family:var(--f-body)}
+svg .bx{fill:none;stroke:var(--edge);stroke-width:1.25}
+svg .bc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+svg .bp{fill:none;stroke:var(--edge);stroke-width:1.25;stroke-dasharray:5 4}
+svg .bt{fill:var(--tint);stroke:var(--edge);stroke-width:1.25}
+svg .ln{fill:none;stroke:var(--edge);stroke-width:1.25}
+svg .lnd{fill:none;stroke:var(--edge);stroke-width:1.25;stroke-dasharray:4 4}
+svg .eth{stroke:var(--sea);stroke-width:3}
+svg .can{stroke:var(--edge);stroke-width:3}
+svg .rail{stroke:var(--accent);stroke-width:2;stroke-dasharray:8 5}
+svg .ah{fill:var(--edge)}
+@media (max-width:820px){
+  .shell{grid-template-columns:1fr}
+  nav.side{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;gap:12px;padding-block:10px;padding-top:max(10px,env(safe-area-inset-top,0px));overflow-x:auto;z-index:5}
+  .brand span,.side .foot{display:none}
+  .navgrp{padding:8px 2px 8px 14px;white-space:nowrap;border-left:1px solid rgba(255,255,255,.15)}
+  .brand b{white-space:nowrap;font-size:15px}
+  .navlist{flex-direction:row;gap:4px}
+  .navlist button{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;border-radius:0;padding:8px}
+  .navlist button[aria-current="page"]{border-bottom-color:var(--accent);background:none}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px))}
+}
+@media (prefers-reduced-motion:no-preference){section{animation:fadein .18s ease-out}@keyframes fadein{from{opacity:.6}to{opacity:1}}}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>body{margin:0}</style>
+<style id="site-theme">
+/* ===== 홈페이지형 테마: 상단 메뉴 + 히어로 + 카드. 위의 기본 스타일을 덮어쓴다 ===== */
+:root{
+  --bg:#f3f6fa; --panel:#ffffff; --ink:#0f2238; --muted:#566779; --line:#dbe3ec; --edge:#8697ab;
+  --accent:#f0662f; --accent-soft:#fff1ea; --sea:#0b69a3; --sea-2:#13a1c4; --tint:#edf3f9;
+  --nav:#ffffff; --nav-ink:#0f2238; --nav-muted:#4d5f73;
+  --hero-1:#03233f; --hero-2:#09588a; --hero-3:#159bbd;
+  --shadow:0 1px 2px rgba(15,34,56,.05),0 4px 16px rgba(15,34,56,.06);
+  --shadow-hi:0 6px 14px rgba(15,34,56,.08),0 18px 40px rgba(15,34,56,.12);
+  --r:14px; --wrap:1180px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a1420; --panel:#112030; --ink:#e3ecf5; --muted:#9aabbd; --line:#223649; --edge:#6c8298;
+  --accent:#ff8a5b; --accent-soft:#3a2419; --sea:#55b8e8; --sea-2:#3fd1ea; --tint:#16293b;
+  --nav:#0d1a28; --nav-ink:#e3ecf5; --nav-muted:#a9b9ca; --hero-1:#021627; --hero-2:#063f66; --hero-3:#0b7896;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); --shadow-hi:0 8px 20px rgba(0,0,0,.35),0 18px 40px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1420; --panel:#112030; --ink:#e3ecf5; --muted:#9aabbd; --line:#223649; --edge:#6c8298;
+  --accent:#ff8a5b; --accent-soft:#3a2419; --sea:#55b8e8; --sea-2:#3fd1ea; --tint:#16293b;
+  --nav:#0d1a28; --nav-ink:#e3ecf5; --nav-muted:#a9b9ca; --hero-1:#021627; --hero-2:#063f66; --hero-3:#0b7896;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); --shadow-hi:0 8px 20px rgba(0,0,0,.35),0 18px 40px rgba(0,0,0,.35); color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+
+body{font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.shell{display:block;min-height:100%}
+a{color:var(--sea)}
+
+/* 상단 메뉴 */
+.topnav{position:sticky;top:0;z-index:50;background:var(--nav);border-bottom:1px solid var(--line);box-shadow:0 1px 0 rgba(15,34,56,.02),0 6px 18px rgba(15,34,56,.05)}
+.topnav-in{max-width:var(--wrap);margin:0 auto;padding:0 24px;min-height:66px;display:flex;align-items:center;gap:18px}
+.topnav .brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;cursor:pointer;color:var(--nav-ink);font:inherit}
+.topnav .brand .mark{width:34px;height:34px;flex:none}
+.mk-bg{fill:var(--sea)} .mk-b{fill:#fff} .mk-w{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.topnav .brand .bt{display:flex;flex-direction:column;line-height:1.1;text-align:left;font-family:var(--f-body);text-transform:none;letter-spacing:0;color:var(--nav-ink);font-size:inherit}
+section{scroll-margin-top:110px}
+.topnav .brand .bt small{font-size:11px;color:var(--nav-muted);letter-spacing:.04em;font-family:var(--f-body);text-transform:none}
+.topnav .brand .bt b{font-size:19px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.menu{display:flex;align-items:center;gap:2px;margin-left:auto}
+.ng{position:relative}
+.menu button{font:inherit;font-size:14.5px;background:none;border:0;color:var(--nav-muted);padding:9px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.menu button:hover{color:var(--nav-ink);background:var(--tint)}
+.menu .ng > button[aria-current="page"],.ng.active > .ng-btn{color:var(--sea);font-weight:700;box-shadow:inset 0 -3px 0 var(--accent);border-radius:8px 8px 0 0}
+.ng-btn::after{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);margin-left:6px;opacity:.7}
+.ng:has(.ng-menu .badge:not([hidden])) > .ng-btn::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);order:2;margin-left:2px}
+.ng-menu{position:absolute;top:calc(100% + 8px);left:0;min-width:210px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-hi);padding:6px;display:none;flex-direction:column;gap:2px;z-index:60}
+.ng-menu::before{content:"";position:absolute;left:0;right:0;top:-10px;height:10px}
+.ng.open > .ng-menu{display:flex}
+@media (hover:hover) and (min-width:961px){.ng.drop:hover > .ng-menu{display:flex}}
+.ng-menu button{width:100%;justify-content:space-between;color:var(--ink);font-size:14px;padding:9px 12px}
+.ng-menu button[aria-current="page"]{background:var(--tint);color:var(--sea);font-weight:700}
+.menu .nav-cta{background:var(--sea);color:#fff;font-weight:700;margin-left:6px;padding:9px 16px}
+.menu .nav-cta:hover{background:var(--sea);color:#fff;filter:brightness(1.08)}
+.menu .ng > .nav-cta[aria-current="page"]{color:#fff;box-shadow:0 0 0 3px var(--accent-soft),inset 0 -3px 0 var(--accent)}
+.theme-toggle{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--nav-muted);display:grid;place-items:center;cursor:pointer;flex:none}
+.theme-toggle svg{width:18px;height:18px}
+.theme-toggle:hover{color:var(--sea);border-color:var(--sea)}
+.menu-toggle{display:none;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-left:auto;cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:4px}
+.menu-toggle span{display:block;width:18px;height:2px;background:var(--nav-ink);border-radius:2px}
+
+/* 본문 */
+main{max-width:var(--wrap);margin:0 auto;padding:32px 24px 72px;gap:28px;box-sizing:border-box}
+header.top{gap:10px}
+.eyebrow{display:inline-block;width:max-content;max-width:100%;font-family:var(--f-body);font-size:12.5px;font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--sea);background:var(--tint);border-radius:999px;padding:4px 12px}
+h1{font-size:clamp(25px,3.2vw,36px);line-height:1.28;letter-spacing:-.015em}
+h2{font-size:20px;letter-spacing:-.01em}
+.lead{font-size:16.5px;max-width:70ch}
+.cap{font-size:13.5px}
+
+/* 히어로(개요) */
+.hero{position:relative;margin:-32px calc(50% - 50vw) 0;padding:64px max(24px,calc(50vw - var(--wrap) / 2 + 24px)) 120px;color:#fff;
+  background:radial-gradient(1100px 420px at 85% 10%,rgba(255,255,255,.12),transparent 60%),linear-gradient(135deg,var(--hero-1),var(--hero-2) 55%,var(--hero-3));overflow:hidden}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:70px;background:var(--bg);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70' preserveAspectRatio='none'%3E%3Cpath d='M0 40C240 0 480 0 720 30s480 50 720 10V70H0z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70' preserveAspectRatio='none'%3E%3Cpath d='M0 40C240 0 480 0 720 30s480 50 720 10V70H0z'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+.hero-in{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:32px;align-items:center}
+.hero-copy{display:grid;gap:16px}
+.hero .eyebrow{background:rgba(255,255,255,.14);color:#e6f6ff;border:1px solid rgba(255,255,255,.22)}
+.hero h1{color:#fff;font-size:clamp(28px,4vw,46px);line-height:1.2}
+.hero .lead{color:rgba(240,248,255,.86);font-size:17px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.btn.hero-primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;padding:11px 20px;font-size:15px}
+.btn.hero-primary:hover{filter:brightness(1.07);color:#fff;border-color:var(--accent)}
+.btn.hero-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.45);color:#fff;padding:11px 18px;font-size:15px}
+.btn.hero-ghost:hover{background:rgba(255,255,255,.18);color:#fff;border-color:#fff}
+.hero-art{width:100%;height:auto;max-width:420px;justify-self:end}
+.ha-ring{fill:none;stroke:rgba(255,255,255,.22);stroke-width:1.5}
+.ha-sweep{stroke:#7fe6ff;stroke-width:2.5;stroke-linecap:round;opacity:.8}
+.ha-hull{fill:#fff} .ha-cabin{fill:#cfe9f7} .ha-mast{stroke:#fff;stroke-width:3;stroke-linecap:round}
+.ha-wave{fill:none;stroke:rgba(255,255,255,.55);stroke-width:3;stroke-linecap:round} .ha-wave2{stroke:rgba(255,255,255,.25)}
+@media (prefers-reduced-motion:no-preference){.ha-sweep{transform-origin:250px 96px;animation:sweep 5s linear infinite}@keyframes sweep{to{transform:rotate(360deg)}}}
+#home .kpis{margin-top:-84px;position:relative;z-index:2}
+
+/* 카드·패널 */
+.kpis{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.kpi{border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);gap:4px}
+.kpi b{font-family:var(--f-body);font-size:30px;font-weight:700;color:var(--sea);letter-spacing:-.02em}
+.kpi span{font-size:13px}
+.panel{border-radius:var(--r);padding:24px;box-shadow:var(--shadow);gap:14px}
+.tiles{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.tile{border:1px solid var(--line);border-top:0;border-radius:var(--r);padding:22px 22px 20px;box-shadow:var(--shadow);gap:8px;position:relative;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease}
+.tile::before{content:"";position:absolute;left:0;top:0;right:0;height:5px;background:var(--sea)}
+.tile.g1::before{background:var(--accent)} .tile.g3::before{background:#7a6bd0} .tile.g4::before{background:var(--sea-2)}
+.tile b{font-size:18px}
+.tile b::after{content:" →";color:var(--sea);opacity:0;transition:opacity .15s}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-hi);border-color:var(--line)}
+.tile:hover b::after{opacity:1}
+.tile span{font-size:14px}
+.models{gap:16px}
+.model{border-radius:var(--r);padding:20px;box-shadow:var(--shadow);border-top:5px solid var(--sea);gap:8px}
+.model:nth-child(2){border-top-color:var(--sea-2)}
+.model.mil{border-color:var(--line);border-top-color:var(--accent)}
+.model.sec{border-top-color:#7a6bd0}
+.model.sec .tag{color:#7a6bd0}
+.model .tag{font-family:var(--f-body);font-weight:600}
+.model{overflow:hidden}
+.model-img{display:block;width:calc(100% + 40px);margin:-20px -20px 6px;aspect-ratio:16/9;object-fit:cover;background:var(--tint)}
+.model h3{font-size:18px}
+.cards{gap:12px}
+.card{border-radius:12px;padding:16px 18px;transition:box-shadow .15s}
+.card:hover{box-shadow:var(--shadow)}
+.card.media{grid-template-columns:104px minmax(0,1fr);align-items:center;column-gap:14px}
+.card.media img{width:104px;height:70px;object-fit:cover;border-radius:8px;grid-row:span 3;background:var(--tint)}
+.card.top{border-color:var(--accent)}
+ul.check{gap:8px}
+ul.check li::marker{color:var(--sea)}
+.links a{display:inline-flex;gap:6px;align-items:center;text-decoration:none;font-weight:500;padding:6px 0;border-bottom:1px dashed var(--line)}
+.links a:hover{text-decoration:underline}
+
+/* 버튼·입력 */
+.btn{border-radius:8px;padding:8px 14px;font-weight:500;transition:background .15s,border-color .15s,color .15s}
+.btn:hover{border-color:var(--sea);color:var(--sea)}
+.btn.primary{background:var(--sea);border-color:var(--sea);color:#fff}
+.btn.primary:hover{color:#fff;filter:brightness(1.08)}
+select,input[type=search]{border-radius:8px;padding:8px 10px}
+textarea{border-radius:12px}
+.pill{border-radius:999px;padding:2px 10px}
+.chip{background:var(--tint);color:var(--ink)}
+.seg{border-radius:8px}
+
+/* 표 */
+.tablebox{border:1px solid var(--line);border-radius:12px}
+table{font-size:13.5px}
+th{background:var(--tint);color:var(--muted);font-weight:600;padding:10px 12px}
+td{padding:10px 12px}
+tbody tr:hover td{background:color-mix(in srgb,var(--tint) 60%,transparent)}
+tbody tr:last-child td{border-bottom:0}
+.figbox{border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+
+/* 경쟁·참고 제품 카드 */
+.pgrid{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.pcard{border-radius:var(--r);box-shadow:var(--shadow);transition:transform .15s ease,box-shadow .15s ease}
+.pcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-hi)}
+.pcard.ours{border:2px solid var(--accent)}
+.pfig{aspect-ratio:16/10;background:linear-gradient(180deg,var(--tint),var(--panel))}
+.pfig img{transition:transform .4s ease}
+.pcard:hover .pfig img{transform:scale(1.03)}
+.pfig .cr{right:8px;bottom:8px;left:auto;max-width:calc(100% - 16px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10.5px;background:rgba(10,20,32,.62);color:#e8f1f8;border-radius:6px;padding:1px 7px;text-decoration:none;opacity:1}
+a.cr:hover{text-decoration:underline}
+.sim-badge{position:absolute;left:8px;top:8px;max-width:calc(100% - 16px);font-size:11px;font-weight:600;background:rgba(240,102,47,.92);color:#fff;border-radius:999px;padding:2px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbody{padding:14px 16px 16px;gap:8px}
+.pbody .t{font-size:16.5px}
+.lawcard{border-radius:12px;box-shadow:var(--shadow);padding:16px 18px}
+
+/* 강조색: 파랑 = 핵심 가치, 주황 = 다짐·주의 */
+.hl{color:var(--sea);font-weight:700;background:linear-gradient(transparent 64%,color-mix(in srgb,var(--sea) 16%,transparent) 0)}
+.hl-a{color:var(--accent);font-weight:700}
+.hero .hl{color:#7fe6ff;background:none}
+.hero .hl-a{color:#ffb38a}
+h1 .hl{background:linear-gradient(transparent 70%,color-mix(in srgb,var(--sea) 18%,transparent) 0)}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-top:8px}
+.sec-head h2{font-size:22px}
+/* 우리의 다짐 */
+.vision{display:grid;gap:18px;padding:30px 28px;border-radius:var(--r);background:linear-gradient(135deg,var(--panel),color-mix(in srgb,var(--sea) 7%,var(--panel)));border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.vision::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(var(--sea),var(--accent))}
+.vision-head{display:grid;gap:10px}
+.vision h2{font-size:clamp(22px,2.8vw,32px);line-height:1.3;letter-spacing:-.015em}
+.vgrid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.vcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:8px;align-content:start}
+.vcard .vk{display:inline-block;width:max-content;font-size:12px;font-weight:700;color:#fff;background:var(--sea);border-radius:999px;padding:2px 10px}
+.vcard:nth-child(2) .vk{background:var(--sea-2)} .vcard:nth-child(3) .vk{background:var(--accent)}
+.vcard b{font-size:18px;line-height:1.35}
+.vcard p{margin:0;color:var(--muted);font-size:14px}
+.pledge{margin:4px 0 0;padding:18px 22px;border-radius:12px;background:var(--hero-1);color:#fff;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.pledge p{margin:0;font-size:clamp(17px,2vw,22px);font-weight:700;line-height:1.45}
+.pledge .hl-a{color:#ffb38a}
+.pledge cite{font-style:normal;font-size:13px;color:rgba(255,255,255,.7)}
+
+/* 꼬리말 */
+.site-foot{border-top:1px solid var(--line);background:var(--panel)}
+.foot-in{max-width:var(--wrap);margin:0 auto;padding:28px 24px 36px;display:grid;gap:12px}
+.foot-brand{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.foot-brand b{font-size:16px}
+.foot-brand span{font-size:13px;color:var(--muted)}
+.foot-links{display:flex;flex-wrap:wrap;gap:4px}
+.foot-links button{font:inherit;font-size:13.5px;background:none;border:0;color:var(--sea);padding:4px 10px 4px 0;cursor:pointer}
+.foot-links button:hover{text-decoration:underline}
+
+/* 태블릿·폰 */
+@media (max-width:960px){
+  .topnav-in{flex-wrap:wrap;gap:10px;padding:8px 16px;min-height:60px}
+  .menu-toggle{display:flex}
+  .menu{display:none;order:3;width:100%;flex-direction:column;align-items:stretch;gap:0;margin:0 0 8px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel);max-height:calc(100vh - 90px);overflow-y:auto}
+  .topnav.open .menu{display:flex}
+  .menu button{width:100%;padding:11px 12px}
+  .ng-btn{pointer-events:none;color:var(--muted)!important;font-size:12px!important;font-weight:700;padding:12px 12px 4px!important;box-shadow:none!important}
+  .ng-btn::after{display:none}
+  .ng-menu{position:static;display:flex;border:0;box-shadow:none;padding:0 0 4px 8px;min-width:0;background:none}
+  .menu .ng > button[aria-current="page"]{box-shadow:inset 3px 0 0 var(--accent);border-radius:0 8px 8px 0}
+  .menu .nav-cta{margin:8px 0 0;justify-content:center}
+  .theme-toggle{order:2}
+  .hero-in{grid-template-columns:1fr}
+  .hero-art{display:none}
+  .hero{padding-top:44px;padding-bottom:104px}
+}
+@media (max-width:820px){
+  .shell{display:block}
+  main{padding:24px 16px 56px}
+  .hero{margin-top:-24px;padding-left:16px;padding-right:16px}
+  .topnav .brand .bt{display:flex}
+  .topnav .brand .bt small{display:block}
+}
+</style>
+<script src="claude-shim.js"></script>
+</head><body>
+<div class="shell">
+  <nav class="topnav" aria-label="주 메뉴">
+    <div class="topnav-in">
+      <button type="button" class="brand" data-go="home" aria-label="수상드론 what's next 첫 화면">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" class="mk-bg"/><path d="M9 15.5h14l-2.6-4.2h-8.8z" class="mk-b"/><path d="M5 20.5c2.8 0 2.8-2.4 5.5-2.4s2.7 2.4 5.5 2.4 2.8-2.4 5.5-2.4 2.7 2.4 5.5 2.4" class="mk-w"/></svg>
+        <span class="bt"><small>수상드론</small><b>what's next</b></span>
+      </button>
+      <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="menu" aria-label="메뉴"><span></span><span></span><span></span></button>
+      <div class="menu" id="menu" role="list">
+        <div class="ng"><button type="button" data-go="home" aria-current="page">개요</button></div>
+        <div class="ng drop"><button type="button" class="ng-btn" aria-expanded="false">사업·과제</button>
+          <div class="ng-menu">
+            <button type="button" data-go="mon">과제 모니터링<span class="badge" id="nav-rec" hidden></span></button>
+            <button type="button" data-go="prop">제안서 작성</button>
+          </div></div>
+        <div class="ng drop"><button type="button" class="ng-btn" aria-expanded="false">시장·전황</button>
+          <div class="ng-menu">
+            <button type="button" data-go="bench">경쟁·참고 제품</button>
+            <button type="button" data-go="war">전황 모니터링</button>
+            <button type="button" data-go="sites">주요 사이트</button>
+          </div></div>
+        <div class="ng"><button type="button" data-go="law">법규·규정</button></div>
+        <div class="ng drop"><button type="button" class="ng-btn" aria-expanded="false">제품 요구사항(PRD)</button>
+          <div class="ng-menu">
+            <button type="button" data-go="req">요구사항</button>
+            <button type="button" data-go="arch">시스템 구성</button>
+            <button type="button" data-go="elem">엘리먼트</button>
+            <button type="button" data-go="comm">통신 규격</button>
+            <button type="button" data-go="icd">인터페이스(ICD)</button>
+            <button type="button" data-go="verify">공급망·검증</button>
+            <button type="button" data-go="design">선체 설계·단가 도구</button>
+          </div></div>
+        <div class="ng"><button type="button" class="nav-cta" data-go="sim">운용 시뮬레이터<span class="badge" id="nav-sim" hidden></span></button></div>
+      </div>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="화면 테마 바꾸기" title="화면 테마: 자동"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+    </div>
+  </nav>
+
+  <main>
+    <section id="home" aria-labelledby="h-home">
+      <div style="display:grid;gap:20px">
+        <header class="top hero">
+          <div class="hero-in">
+            <div class="hero-copy">
+              <div class="eyebrow">USV 공통 플랫폼 · 2027 프로토타입</div>
+              <h1 id="h-home">상용부품 하나의 플랫폼,<br><span class="hl">네 가지 수상드론</span></h1>
+              <p class="lead">인명구조 · 해양관측 · 국방 · 국가중요시설 경계.<br>쉽게 조립하고, <span class="hl">싸고 빠르게 양산</span>합니다. <span class="hl-a">중국산 부품 0건.</span></p>
+              <div class="hero-cta">
+                <button type="button" class="btn hero-primary" data-go="req">PRD 요구사항 보기</button>
+                <button type="button" class="btn hero-ghost" data-go="sim">운용 시뮬레이터</button>
+                <button type="button" class="btn hero-ghost" data-go="mon">오늘의 과제</button>
+              </div>
+            </div>
+            <svg class="hero-art" viewBox="0 0 360 240" aria-hidden="true">
+              <circle cx="250" cy="96" r="78" class="ha-ring"/><circle cx="250" cy="96" r="50" class="ha-ring"/><circle cx="250" cy="96" r="22" class="ha-ring"/>
+              <path d="M250 96L318 58" class="ha-sweep"/>
+              <path d="M70 150h190l-26-32H112z" class="ha-hull"/><rect x="132" y="98" width="52" height="20" rx="4" class="ha-cabin"/><path d="M158 98V74M150 80h16" class="ha-mast"/>
+              <path d="M0 172c30 0 30-12 60-12s30 12 60 12 30-12 60-12 30 12 60 12 30-12 60-12 30 12 60 12" class="ha-wave"/>
+              <path d="M0 200c30 0 30-12 60-12s30 12 60 12 30-12 60-12 30 12 60 12 30-12 60-12 30 12 60 12" class="ha-wave ha-wave2"/>
+            </svg>
+          </div>
+        </header>
+        <div class="kpis" id="kpis"></div>
+        <section class="vision" aria-labelledby="h-vision">
+          <div class="vision-head">
+            <span class="eyebrow">우리의 다짐</span>
+            <h2 id="h-vision">대한민국 바다를 지키는 무인 플랫폼,<br><span class="hl">반드시 완수합니다.</span></h2>
+            <p class="lead">함정 전기배선·항온항습 현장에서 쌓은 기술로, 우리 바다에 필요한 수상드론을 직접 만들고 끝까지 책임집니다.</p>
+          </div>
+          <div class="vgrid3">
+            <article class="vcard"><span class="vk">목표</span><b>2027년 초,<br>첫 프로토타입 실해역 시연</b><p>모델 A부터 바다에 띄우고, <span class="hl">시험으로 증명한 수치</span>만 약속합니다.</p></article>
+            <article class="vcard"><span class="vk">비전</span><b>하나의 플랫폼,<br>네 가지 임무</b><p>구조 · 관측 · 국방 · 국가중요시설 경계를 같은 모듈로. <span class="hl">싸게, 빠르게, 많이.</span></p></article>
+            <article class="vcard"><span class="vk">원칙</span><b>중국산 부품 0건,<br>투명한 공급망</b><p>모든 부품의 원산지를 증빙하고, <span class="hl">국산 우선</span>으로 조달합니다.</p></article>
+          </div>
+          <blockquote class="pledge"><p>“맡은 사업은 일정 · 성능 · 품질까지<br><span class="hl-a">반드시 끝까지 완수합니다.</span>”</p><cite>수상드론 what's next 팀</cite></blockquote>
+        </section>
+        <div class="tiles" role="list" aria-label="업무 그룹">
+          <button type="button" class="tile g1" data-go="mon"><b>사업·과제</b><span>공모 과제 모니터링·권고, 제출본 수준 제안서 작성</span></button>
+          <button type="button" class="tile" data-go="bench"><b>시장·전황</b><span>경쟁·참고 제품 비교, 두 전쟁의 드론 운용, 주요 사이트</span></button>
+          <button type="button" class="tile g3" data-go="law"><b>법규·규정</b><span>국방·해양·전파·수출·공급망 규제와 당사 조치</span></button>
+          <button type="button" class="tile g4" data-go="req"><b>제품 요구사항(PRD)</b><span>요구사항, 시스템·엘리먼트 설계, 통신 규격, ICD, 검증</span></button>
+        </div>
+        <div class="grid2">
+          <div class="panel"><div class="row" style="justify-content:space-between"><h2>최근 전황(드론)</h2><button type="button" class="btn" data-go="war">전황 열기 →</button></div><div class="cards" id="home-war"></div></div>
+          <div class="panel"><div class="row" style="justify-content:space-between"><h2>주목할 경쟁 제품</h2><button type="button" class="btn" data-go="bench">제품 열기 →</button></div><div class="cards" id="home-prod"></div></div>
+        </div>
+        <div class="sec-head"><h2>제품 라인업</h2><p class="cap">공통 플랫폼에서 나오는 네 가지 모델 · 이미지는 가상 프로토타입(3D 렌더링)</p><a class="btn" href="tools/ours-3d.html" target="_blank" rel="noopener" style="margin-left:auto">3D로 돌려보기 ↗</a></div>
+        <div class="models">
+          <article class="model"><img class="model-img" src="img/ours/model-a.jpg" alt="모델 A 인명구조형 가상 프로토타입(3D 렌더링)" loading="lazy"><span class="tag">모델 A · 3m급 · 민간</span><h3>인명구조형</h3><p class="cap">해경·소방 · 급류·야간 수역에 먼저 투입. <span class="hl">열화상 탐색 → 구조부이 전달.</span></p></article>
+          <article class="model"><img class="model-img" src="img/ours/model-b.jpg" alt="모델 B 해양관측형 가상 프로토타입(3D 렌더링)" loading="lazy"><span class="tag">모델 B · 6m급 · 민간</span><h3>해양관측형</h3><p class="cap">해양수산부·지자체 · 어장·기상·오염 감시. <span class="hl">8시간 자율 순항(안).</span></p></article>
+          <article class="model mil"><img class="model-img" src="img/ours/model-c.jpg" alt="모델 C 저가 소모형 플랫폼 가상 프로토타입(3D 렌더링)" loading="lazy"><span class="tag">모델 C · 6~7m급 이하 · 군용</span><h3>군용 저가 소모형 플랫폼</h3><p class="cap">국방 · <span class="hl">대량 생산·장기 보관·빠른 전개.</span> 플랫폼과 임무 베이 인터페이스까지만 담당.</p></article>
+          <article class="model sec"><img class="model-img" src="img/ours/model-d.jpg" alt="모델 D 국가중요시설 감시·정찰형 가상 프로토타입(3D 렌더링)" loading="lazy"><span class="tag">모델 D · 4~5m급(안) · 공공 보안</span><h3>국가중요시설 감시·정찰형</h3><p class="cap">원전·국가주요항만 · <span class="hl">24시간 경계 순찰</span>, 미식별 선박 탐지·경보. 경고 방송까지만, 무장 없음.</p></article>
+        </div>
+        <div class="panel"><div class="row" style="justify-content:space-between"><h2>오늘의 추천 과제</h2><button type="button" class="btn" data-go="mon">과제 모니터링 열기 →</button></div><p class="cap" id="home-lastrun">갱신 정보를 불러오는 중…</p><div class="cards" id="home-rec"></div></div>
+        <div class="grid2">
+          <div class="panel"><h2>설계 원칙</h2><ul class="check"><li><span class="hl">공통 모듈 4개</span>로 네 모델 조립</li><li>핵심기술 직접 개발: 전원 · 전장 함체·열관리 · AI 상태감시</li><li>통신 이중화, 끊기면 <span class="hl">자동 안전 복귀</span></li><li><span class="hl-a">중국산 부품 0건</span> · 전 품목 원산지 증빙</li><li>민간은 공개 규격, 군용은 게이트웨이만 추가</li></ul></div>
+          <div class="panel"><h2>관련 산출물</h2><div class="links">
+            <a href="https://claude.ai/code/artifact/979779b0-1522-4051-9cc5-1c7ea637f225" target="_blank" rel="noopener">PRD 원문 문서(편집·댓글) ↗</a>
+            <a href="https://claude.ai/code/artifact/decf2f20-b067-4b1a-a17a-d3cf6aad7f11" target="_blank" rel="noopener">기품원 민·군규격표준화 제안서 ↗</a>
+            <a href="https://claude.ai/artifact/7cVETNw2Lb9KCbKCHDNNzQ" target="_blank" rel="noopener">대표 보고 발표자료 ↗</a>
+            <a href="sim/" target="_blank" rel="noopener">지상통제소 운용 시뮬레이터 ↗</a>
+            <a href="tools/usv_hull_designer_magura.html" target="_blank" rel="noopener">선체 설계·단가 시뮬레이터 ↗</a>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="mon" hidden aria-labelledby="h-mon"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">과제 모니터링 · 매일 08:52(서울) 자동 갱신</div><h1 id="h-mon">지원할 과제, <span class="hl">매일 아침 추천</span></h1><p class="lead" id="lastrun">갱신 정보를 불러오는 중…</p></header>
+      <div class="kpis" id="mstats"></div>
+      <div class="panel"><h2>권고 과제</h2><p class="cap">접수중·예정 과제 중 적합도 4 이상. 적합도 = 수상드론 관련성 + 관심기관 + 접수 가능성 + 소기업 지원 + 회사 역량 연결성 + 비중국산 공급망 부합.</p><div class="cards" id="rec-list"></div></div>
+      <div class="panel"><h2>공고 표</h2>
+        <div class="row">
+          <label class="cap" for="f-status">상태</label><select id="f-status"><option value="all">전체</option><option>접수중</option><option>예정</option><option>마감</option><option>참고</option></select>
+          <label class="cap" for="f-cat">구분</label><select id="f-cat"><option value="all">전체</option><option>국가</option><option>지자체</option><option>산학연</option><option>동향</option></select>
+          <label class="cap" for="f-q">검색</label><input type="search" id="f-q" placeholder="기관·과제명">
+        </div>
+        <div class="tablebox"><table id="grid"><thead><tr><th data-k="fit" aria-sort="descending">적합도</th><th data-k="status">상태</th><th data-k="title">과제(공고)명</th><th data-k="agency">기관</th><th data-k="category">구분</th><th data-k="posted">공고</th><th data-k="deadline">마감</th><th data-k="budget">규모</th></tr></thead><tbody id="grid-body"><tr><td colspan="8" class="cap">공고를 불러오는 중입니다.</td></tr></tbody></table></div>
+        <p class="cap">열 제목을 누르면 정렬, 과제명을 누르면 원문이 열립니다. 접수기간·예산은 원문 공고로 다시 확인하세요.</p>
+      </div>
+    </div></section>
+
+    <section id="prop" hidden aria-labelledby="h-prop"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">제안서 작성 · PRD 연동</div><h1 id="h-prop">과제만 고르면 <span class="hl">제안서 초안 완성</span></h1><p class="lead">연구개발계획서 표준 목차(요약문 · 1~12장 · 제출 전 확인)로 작성. PRD 설계 내용이 자동으로 들어갑니다.</p></header>
+      <div class="panel">
+        <div class="row">
+          <label class="cap" for="d-call">과제</label><select id="d-call"></select>
+          <button type="button" class="btn primary" id="d-gen">제안서 작성</button>
+          <button type="button" class="btn" id="d-stop" hidden>중지</button>
+          <button type="button" class="btn" id="d-save">저장</button>
+          <button type="button" class="btn" id="d-word">Word(.docx)</button>
+          <button type="button" class="btn" id="d-md">텍스트(.md)</button>
+        </div>
+        <p class="status" id="d-status" aria-live="polite"></p>
+        <textarea id="d-text" aria-label="제안서 본문" placeholder="과제를 고르고 ‘제안서 작성’을 누르세요. 저장된 제안서가 있으면 먼저 불러옵니다. 내용은 직접 고칠 수 있습니다."></textarea>
+        <p class="cap">공고문·회사 역량에 없는 수치·일정·예산은 [확인 필요]로 남깁니다. 공고 원문 서식(한글·Word)에 옮겨 담아 제출하세요.</p>
+      </div>
+      <div class="panel"><h2>회사 역량</h2><p class="cap">매일 아침 적합도 평가와 제안서 작성의 기준입니다. 실적·인력·보유기술이 바뀌면 고쳐 저장하세요.</p>
+        <textarea class="short" id="p-text" aria-label="회사 역량"></textarea>
+        <div class="row"><button type="button" class="btn primary" id="p-save">역량 저장</button><span class="status" id="p-status" aria-live="polite"></span></div>
+      </div>
+    </div></section>
+
+    <section id="bench" hidden aria-labelledby="h-bench"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">경쟁·참고 제품 · 벤치마킹</div><h1 id="h-bench">우리 모델 vs 국내외 드론, <span class="hl">한눈에 비교</span></h1><p class="lead">공개 자료로 확인된 제원만. 모르는 값은 <span class="hl-a">‘확인 필요’</span>로 표시. 매일 아침 새 제품 추가.</p></header>
+      <div class="panel">
+        <div class="row">
+          <label class="cap" for="b-model">비교 기준</label><select id="b-model"><option value="all">전체</option><option value="A">모델 A 인명구조형</option><option value="B">모델 B 해양관측형</option><option value="C">모델 C 군용 소모형</option><option value="D">모델 D 국가중요시설 감시</option><option value="참고">수중·공중 참고</option></select>
+          <label class="cap" for="b-dom">영역</label><select id="b-dom"><option value="all">전체</option><option>수상</option><option>수중</option><option>공중</option></select>
+          <label class="cap" for="b-q">검색</label><input type="search" id="b-q" placeholder="제품·제조사·국가">
+          <span class="seg" role="group" aria-label="보기 방식"><button type="button" id="v-card" aria-pressed="true">카드</button><button type="button" id="v-table" aria-pressed="false">표</button></span>
+        </div>
+        <div class="pgrid" id="b-cards"></div>
+        <p class="cap" id="b-cardnote">사진이 없는 제품은 형상 일러스트로 보여 줍니다. ‘사진 올리기’로 직접 사진을 넣을 수 있고, ‘사진 찾기’는 위키미디어 공용(자유 이용 사진)을 엽니다.</p>
+        <div class="tablebox" id="b-tablebox" hidden><table id="b-grid" style="min-width:1100px"><thead><tr><th>영역</th><th>제품</th><th>제조사·국가</th><th>임무</th><th>길이</th><th>속도</th><th>항속·지속</th><th>탑재</th><th>단가</th><th>현황</th><th>비교·시사점</th></tr></thead><tbody id="b-body"></tbody></table></div>
+        <p class="cap" id="b-tnote" hidden>주황 줄은 당사 모델(PRD 초기 목표안)입니다. 제품명을 누르면 출처가 열립니다.</p>
+      </div>
+    </div></section>
+
+    <section id="war" hidden aria-labelledby="h-war"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">전황 모니터링 · 드론 운용 중심</div><h1 id="h-war">두 전쟁의 드론 운용, <span class="hl">매일 추적</span></h1><p class="lead" id="w-updated">불러오는 중…</p></header>
+      <div class="grid2" id="w-sum"></div>
+      <div class="panel">
+        <div class="row">
+          <label class="cap" for="w-th">전장</label><select id="w-th"><option value="all">전체</option><option>우-러</option><option>미-이란</option><option>일반</option></select>
+          <label class="cap" for="w-dom">영역</label><select id="w-dom"><option value="all">전체</option><option>수상</option><option>수중</option><option>공중</option></select>
+          <label class="cap" for="w-type">형식</label><select id="w-type"><option value="all">전체</option><option>기사</option><option>동영상</option></select>
+        </div>
+        <div class="cards" id="w-list"></div>
+        <p class="cap">교전 당사국 발표는 검증되지 않은 주장일 수 있습니다. 동영상은 새 탭에서 열립니다.</p>
+      </div>
+    </div></section>
+
+    <section id="sites" hidden aria-labelledby="h-sites"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">주요 사이트</div><h1 id="h-sites">드론·전황 정보, <span class="hl">여기서 찾기</span></h1></header>
+      <div class="grid2" id="s-list"></div>
+    </div></section>
+
+    <section id="law" hidden aria-labelledby="h-law"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">법규·규정</div><h1 id="h-law">개발부터 수출까지, <span class="hl">챙겨야 할 법규</span></h1><p class="lead">법규별 핵심 · 적용 모델 · 할 일 정리. <span class="hl-a">법률 자문 아님</span> — 세부 요건은 원문과 소관 기관에서 확인.</p></header>
+      <div class="row"><label class="cap" for="l-model">적용 모델</label><select id="l-model"><option value="all">전체</option><option value="A">모델 A</option><option value="B">모델 B</option><option value="C">모델 C</option><option value="D">모델 D</option></select></div>
+      <div class="lawgrid" id="l-list"></div>
+    </div></section>
+
+    <section id="req" hidden aria-labelledby="h-req"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">03 · 제품 요구사항</div><h1 id="h-req"><span class="hl">공통 요구 10개</span> + 모델별 요구</h1></header>
+      <div class="panel"><h2>공통 요구</h2><div class="tablebox"><table id="t-com"></table></div></div>
+      <div class="panel"><h2>모델별 요구</h2><div class="tablebox"><table id="t-model"></table></div><p class="cap"><span class="hl-a">‘안’</span> = 초기 목표. 프로토타입 시험과 수요기관 협의로 확정.</p></div>
+    </div></section>
+
+    <section id="arch" hidden aria-labelledby="h-arch"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">04 · 시스템 구성</div><h1 id="h-arch">선체 <span class="hl">9개</span> · 지상통제소 <span class="hl">3개</span> 서브시스템</h1></header>
+      <div class="figbox">
+        <svg viewBox="0 0 760 400" role="img" aria-label="시스템 운용 환경도: 선체는 지상통제소·위성·주변 선박과 연결되고 자료는 상황실로 간다" font-size="13">
+          <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>
+          <text class="tx" x="24" y="30" font-size="15" font-weight="600">L0 운용 환경도 · 선체는 지상통제소·위성·주변 선박과 연결된다</text>
+          <path class="ln" d="M206 186H298" marker-start="url(#a1)" marker-end="url(#a1)"/><path class="ln" d="M462 186H574" marker-start="url(#a1)" marker-end="url(#a1)"/>
+          <path class="ln" d="M320 102V148" marker-start="url(#a1)" marker-end="url(#a1)"/><path class="ln" d="M440 102V148" marker-end="url(#a1)"/>
+          <path class="ln" d="M114 224V298" marker-start="url(#a1)" marker-end="url(#a1)"/><path class="lnd" d="M380 224V280"/>
+          <rect class="bc" x="300" y="150" width="160" height="72" rx="8"/><text class="tx" x="380" y="180" text-anchor="middle" font-weight="600">수상드론 선체</text><text class="tq" x="380" y="200" text-anchor="middle" font-size="11.5">A·B·C·D 공통 플랫폼</text>
+          <rect class="bx" x="24" y="150" width="180" height="72" rx="8"/><text class="tx" x="114" y="180" text-anchor="middle" font-weight="600">지상통제소</text><text class="tq" x="114" y="200" text-anchor="middle" font-size="11.5">1인 운용·관제 SW</text>
+          <rect class="bx" x="24" y="300" width="180" height="72" rx="8"/><text class="tx" x="114" y="330" text-anchor="middle" font-weight="600">수요기관 상황실</text><text class="tq" x="114" y="350" text-anchor="middle" font-size="11.5">해경·소방·해수부·군</text>
+          <rect class="bx" x="576" y="150" width="160" height="72" rx="8"/><text class="tx" x="656" y="180" text-anchor="middle" font-weight="600">주변 선박</text><text class="tq" x="656" y="200" text-anchor="middle" font-size="11.5">AIS 송수신</text>
+          <rect class="bx" x="250" y="56" width="140" height="44" rx="8"/><text class="tx" x="320" y="83" text-anchor="middle">통신 위성(예비)</text>
+          <rect class="bx" x="400" y="56" width="120" height="44" rx="8"/><text class="tx" x="460" y="83" text-anchor="middle">GNSS 위성</text>
+          <rect class="bt" x="230" y="280" width="300" height="40" rx="8"/><text class="tx" x="380" y="305" text-anchor="middle" font-size="11.5">해양 환경: 바람·파도·염분·고온다습</text>
+          <text class="tx" x="252" y="176" text-anchor="middle" font-size="11.5">LTE·메시</text><text class="tq" x="252" y="206" text-anchor="middle" font-size="11.5">MAVLink 2</text>
+          <text class="tx" x="518" y="176" text-anchor="middle" font-size="11.5">AIS(VHF)</text><text class="tq" x="312" y="130" text-anchor="end" font-size="11.5">위성 링크</text>
+          <text class="tq" x="448" y="130" font-size="11.5">GNSS 수신</text><text class="tq" x="122" y="266" font-size="11.5">영상·상태 전달</text>
+        </svg>
+      </div>
+      <p class="cap">제어는 LTE·메시를 주 링크로, 위성을 예비 링크로 씁니다. 해양 환경(고온·고습·염분)은 모든 전장품의 설계 조건입니다.</p>
+      <div class="figbox">
+        <svg viewBox="0 0 760 410" role="img" aria-label="서브시스템 분해도: 선체 9개, 지상통제소 3개" font-size="13">
+          <text class="tx" x="24" y="30" font-size="15" font-weight="600">L1 분해도 · 선체는 서브시스템 9개, 지상통제소는 3개</text>
+          <rect class="bx" x="280" y="50" width="200" height="44" rx="8"/><text class="tx" x="380" y="77" text-anchor="middle" font-weight="600">수상드론 체계</text>
+          <path class="ln" d="M380 94V110H290V124"/><path class="ln" d="M380 110H660V124"/>
+          <rect class="bx" x="24" y="124" width="544" height="232" rx="8"/><text class="tx" x="40" y="148" font-weight="600">선체(USV)</text>
+          <rect class="bx" x="40" y="164" width="160" height="48" rx="8"/><text class="tx" x="120" y="193" text-anchor="middle" font-weight="600">선체·구조</text>
+          <rect class="bx" x="216" y="164" width="160" height="48" rx="8"/><text class="tx" x="296" y="193" text-anchor="middle" font-weight="600">추진</text>
+          <rect class="bc" x="392" y="164" width="160" height="48" rx="8"/><text class="tx" x="472" y="193" text-anchor="middle" font-weight="600">전원</text>
+          <rect class="bc" x="40" y="228" width="160" height="48" rx="8"/><text class="tx" x="120" y="257" text-anchor="middle" font-weight="600">전장 함체·열관리</text>
+          <rect class="bx" x="216" y="228" width="160" height="48" rx="8"/><text class="tx" x="296" y="257" text-anchor="middle" font-weight="600">통신</text>
+          <rect class="bp" x="392" y="228" width="160" height="48" rx="8"/><text class="tx" x="472" y="257" text-anchor="middle" font-weight="600">항법·자율</text>
+          <rect class="bx" x="40" y="292" width="160" height="48" rx="8"/><text class="tx" x="120" y="321" text-anchor="middle" font-weight="600">센서</text>
+          <rect class="bc" x="216" y="292" width="160" height="48" rx="8"/><text class="tx" x="296" y="321" text-anchor="middle" font-weight="600">상태감시</text>
+          <rect class="bx" x="392" y="292" width="160" height="48" rx="8"/><text class="tx" x="472" y="321" text-anchor="middle" font-weight="600">임무 베이</text>
+          <rect class="bx" x="584" y="124" width="152" height="232" rx="8"/><text class="tx" x="600" y="148" font-weight="600">지상통제소</text>
+          <rect class="bx" x="600" y="164" width="120" height="48" rx="8"/><text class="tx" x="660" y="193" text-anchor="middle">관제 SW</text>
+          <rect class="bx" x="600" y="228" width="120" height="48" rx="8"/><text class="tx" x="660" y="257" text-anchor="middle">통신 단말</text>
+          <rect class="bx" x="600" y="292" width="120" height="48" rx="8"/><text class="tx" x="660" y="321" text-anchor="middle">운반·진수 장비</text>
+          <rect class="bc" x="24" y="378" width="20" height="12" rx="3"/><text class="tx" x="52" y="388" font-size="11.5">당사 핵심기술(자체 개발)</text>
+          <rect class="bp" x="250" y="378" width="20" height="12" rx="3"/><text class="tx" x="278" y="388" font-size="11.5">협력·라이선스(자율운항)</text>
+        </svg>
+      </div>
+      <p class="cap">네 모델은 같은 9개 서브시스템을 쓰고 센서와 임무 베이의 내용물만 다릅니다.</p>
+    </div></section>
+
+    <section id="elem" hidden aria-labelledby="h-elem"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">05 · 서브시스템·엘리먼트</div><h1 id="h-elem">핵심 서브시스템 4개, <span class="hl">엘리먼트 20개</span></h1></header>
+      <div class="figbox">
+        <svg viewBox="0 0 760 396" role="img" aria-label="엘리먼트 구성도: 전원, 전장 함체, 통신, 항법·자율 각 5개 엘리먼트" font-size="12" id="svg-elem"></svg>
+      </div>
+      <div class="panel"><h2>엘리먼트 목록</h2><div class="tablebox"><table id="t-elem"></table></div></div>
+    </div></section>
+
+    <section id="comm" hidden aria-labelledby="h-comm"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">06 · 통신 규격</div><h1 id="h-comm">하드웨어는 하나, <span class="hl">군용은 게이트웨이만 추가</span></h1></header>
+      <p class="lead">민간: 공개 규격(MAVLink 2 · NMEA 2000 · CAN · Ethernet)으로 빠르게.<br>군용: 같은 버스 위에 <span class="hl">상호운용 게이트웨이</span>만 얹기.</p>
+      <div class="panel"><div class="tablebox"><table id="t-comm"></table></div></div>
+    </div></section>
+
+    <section id="icd" hidden aria-labelledby="h-icd"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">07 · 인터페이스</div><h1 id="h-icd">버스 2개 + 전원 레일로 <span class="hl">모두 연결</span></h1></header>
+      <div class="figbox">
+        <svg viewBox="0 0 760 440" role="img" aria-label="내부 인터페이스 구성도: Ethernet 백본, CAN FD 제어 버스, 전원 레일" font-size="11.5" id="svg-bus"></svg>
+      </div>
+      <div class="panel"><h2>인터페이스 정의(ICD)</h2><div class="tablebox"><table id="t-icd"></table></div><p class="cap">위험 항목: <span class="hl-a">IF-02 주파수 허가</span> · <span class="hl-a">IF-08 체계업체 합의</span> — 설계 동결 전 확정 필요.</p></div>
+    </div></section>
+
+    <section id="verify" hidden aria-labelledby="h-verify"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">08–10 · 공급망·검증·미결</div><h1 id="h-verify">모듈 시험 → 통합 시험 → <span class="hl">실해역 시험</span></h1></header>
+      <div class="panel"><h2>공급망·양산·인증 요구</h2><div class="tablebox"><table id="t-sup"></table></div></div>
+      <div class="panel"><h2>검증 계획</h2><div class="tablebox"><table id="t-ver"></table></div></div>
+      <div class="panel"><h2>미결 사항</h2><ul class="check" id="l-open"></ul></div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><h2>시뮬레이터로 미리 시험하기</h2><button type="button" class="btn" data-go="sim">운용 시뮬레이터 열기 →</button></div><p class="cap">통합 시험(COM-03·04·09)과 모듈 시험(COM-05·07)의 절차·합격 기준을 지상통제소 시뮬레이터로 먼저 리허설할 수 있습니다.</p></div>
+    </div></section>
+
+    <section id="sim" hidden aria-labelledby="h-sim"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">검증 리허설 · 지상통제소(GCS) 시뮬레이터</div><h1 id="h-sim">실물 시험 전에, <span class="hl">시뮬레이터로 먼저 검증</span></h1><p class="lead">시나리오마다 <span class="hl">합격 기준</span> 제시, 결과는 시험 기록으로 저장. 수치는 PRD 목표안 기준 가정값 — <span class="hl-a">실물 시험 대체 아님.</span></p></header>
+      <div class="kpis" id="sim-kpis"></div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><h2>검증 시나리오</h2><a class="btn primary" href="sim/" target="_blank" rel="noopener">시뮬레이터 새 창으로 열기 ↗</a></div>
+        <div class="scgrid" id="sim-list"></div>
+      </div>
+      <div class="panel"><h2>요구사항 ↔ 시나리오 추적</h2><div class="tablebox"><table id="t-simtrace"></table></div><p class="cap">‘대상 아님’ 항목은 문서 검토·환경시험·시연 등 실물로만 확인합니다.</p></div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><h2>시험 기록</h2><span class="cap" id="sim-runs-st">불러오는 중…</span></div>
+        <div class="tablebox"><table><thead><tr><th>저장 시각</th><th>시나리오</th><th>대상 요구</th><th>결과</th><th>내용</th><th>임무 시간</th><th></th></tr></thead><tbody id="sim-runs"></tbody></table></div>
+        <p class="cap">시뮬레이터에서 시나리오를 마친 뒤 ‘what's next에 기록 저장’을 누르면 여기에 쌓입니다. 행을 누르면 당시 이벤트 기록을 볼 수 있습니다.</p>
+      </div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><h2>부산 실해역 운용 <span class="cap">실제 지도 · 플랫폼별 시나리오</span></h2><a class="btn primary" href="sim/busan.html" target="_blank" rel="noopener">부산 실지도 열기 ↗</a></div>
+        <p class="cap">광안리·태종대·송도·기장·해운대·감천·북항·고리 등 실제 위치에서 모델 A·B·D와 <span class="hl">지상통제소 + 해상통제소(지원함)</span>로 운용합니다. 지도는 Google Maps(키 설정 시) 또는 OpenStreetMap·Esri 위성이며, 표적·경계구역은 <span class="hl-a">훈련용 가상 설정</span>입니다.</p>
+        <div id="busan-list" style="display:grid;gap:14px"></div>
+      </div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><h2>여기서 실행</h2><span class="row"><button type="button" class="btn" id="sim-load">기본 화면 열기</button><button type="button" class="btn" id="sim-close" hidden>닫기</button></span></div>
+        <div id="sim-frame"><p class="empty">‘기본 화면 열기’나 시나리오의 ‘여기서 실행’을 누르면 이 자리에 시뮬레이터가 열립니다. 넓은 화면(1280px 이상)이나 새 창에서 보기 좋습니다.</p></div>
+      </div>
+    </div></section>
+    <section id="design" hidden aria-labelledby="h-design"><div style="display:grid;gap:16px">
+      <header class="top"><div class="eyebrow">설계 도구 · 선체 설계·단가 시뮬레이터</div><h1 id="h-design">치수·재질만 바꾸면 <span class="hl">성능·단가가 바로</span></h1><p class="lead">MAGURA V5 기준 선형 → 흘수·저항·복원성 → 재질별 단가 → 3D 프린트 파일.<br>기본값: 모델 B 축소안(4.5 m · 전기추진).</p></header>
+      <div class="kpis" id="design-steps"></div>
+      <div class="panel"><div class="row" style="justify-content:space-between"><h2>도구 실행</h2><span class="row"><a class="btn primary" href="tools/usv_hull_designer_magura.html" target="_blank" rel="noopener">새 창으로 열기 ↗</a><button type="button" class="btn" id="design-load">여기서 실행</button></span></div>
+        <div id="design-frame"><p class="empty">‘여기서 실행’을 누르면 이 자리에 설계 도구가 열립니다. 표와 3D 화면이 넓어 새 창이 더 편합니다.</p></div>
+      </div>
+      <div class="grid2">
+        <div class="panel"><h2>PRD와 연결해 쓰는 법</h2><ul class="check">
+          <li>모델 B: ‘해양관측용 축소안’으로 시작해 운용 8시간(안)·센서 탑재중량을 판정 카드로 확인</li>
+          <li>모델 A: 단동·쌍동을 바꿔 3m급 차량 적재·2인 진수 중량을 맞추고 복원성(GM) 확인</li>
+          <li>모델 D: 레이더·EO/IR 마스트 높이(마스트 전면적·KG/D 비)를 바꿔 복원성과 8시간 순찰 배터리 확인</li>
+          <li>모델 C: 임무 베이 탑재중량을 ‘페이로드’로 넣어 흘수·속력 여유 확인(임무장비 내부는 다루지 않음)</li>
+          <li>③ 재질·단가 표로 GFRP·HDPE·3D 프린트 공법을 비교해 저가 양산 방향 결정</li>
+          <li>④에서 1:N 축척 STL을 뽑아 수조 모형·전시 모형 제작</li>
+        </ul></div>
+        <div class="panel"><h2>주의</h2><ul class="check">
+          <li>유체 계산은 CFD가 아닌 개념설계 단계 준경험식(ITTC-57·Savitsky)이며 ±15~20% 오차가 있을 수 있습니다. 최종 설계 전 수조시험·CFD로 확인하세요.</li>
+          <li>MAGURA V5 형상은 공표 치수와 공개 사진으로 추정한 근사 선형입니다.</li>
+          <li>재료 단가·공수·두께식 초기값은 가정치입니다. 견적을 받으면 ③ 표에서 고쳐 쓰세요.</li>
+          <li>3D 화면은 three.js를 인터넷(unpkg)에서 불러옵니다. 인터넷이 막힌 사내망에서는 3D 보기가 나오지 않을 수 있습니다.</li>
+        </ul></div>
+      </div>
+    </div></section>
+  </main>
+  <footer class="site-foot">
+    <div class="foot-in">
+      <div class="foot-brand"><b>수상드론 what's next</b><span>USV 공통 플랫폼 · 초기본 2026-10-20 · 수치는 모두 초기 목표안</span></div>
+      <div class="foot-links">
+        <button type="button" data-go="mon">과제 모니터링</button><button type="button" data-go="bench">경쟁·참고 제품</button><button type="button" data-go="law">법규·규정</button><button type="button" data-go="req">PRD</button><button type="button" data-go="design">선체 설계·단가</button><button type="button" data-go="sim">운용 시뮬레이터</button>
+      </div>
+      <p class="cap">제품 사진은 위키미디어 공용의 자유 이용 사진이며 각 사진 아래에 저작자·라이선스를 표기했습니다. ‘유사 기종’ 표시 사진은 해당 제품의 자유 이용 사진이 없어 비슷한 기종으로 대신한 것입니다. 법규 정리는 법률 자문이 아닙니다.</p>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const D = {
+    com: [["COM-01","중국산 부품 배제","BOM 전 품목 원산지·제조사 증빙 100%","문서 검토"],["COM-02","모듈형 구조","4개 모듈, 현장 모듈 교체 30분 이내(안)","시연"],["COM-03","통신 이중화","주·예비 링크 동시 보유, 자동 전환","시험"],["COM-04","통신 두절 시 안전 동작","설정 시간 후 지정점 복귀 또는 정지·표류","시험"],["COM-05","전장 함체 방수","IP67 이상(IEC 60529)","시험"],["COM-06","전장 함체 열·습도 관리","탑재 전자품 정격 범위 유지, 결로 없음","환경시험"],["COM-07","상태감시","전압·전류·잔량·온습도·누수 실시간 전송, 이상 시 경보","시험"],["COM-08","운항·상태 기록","전 임무 로그 저장·추출","시험"],["COM-09","1인 운용","지상통제소 1인이 1척 이상 운용","시연"],["COM-10","사이버보안","링크 암호화, 군·공공 납품분 KCMVP 암호모듈","문서·시험"]],
+    model: [["A 인명구조형","운반·진수","차량 적재, 2인 수동 진수 가능 중량"],["A 인명구조형","탐색","주간 카메라 + 열화상, 실시간 영상"],["A 인명구조형","구조","구조부이 거치·원격 분리"],["A 인명구조형","운용시간","1시간 이상(안)"],["B 해양관측형","자율 순항","경로점 자율 항해, AIS 기반 충돌 회피"],["B 해양관측형","관측 센서","기상(풍향·풍속·기압·기온), 수질(수온·염분·탁도 등), 유출유 감지 영상"],["B 해양관측형","운용시간","8시간 이상(안)"],["C 군용 저가 소모형","성능","수요군 ROC에 따름(본 문서에서 정의하지 않음)"],["C 군용 저가 소모형","양산성","전용 가공품 최소화, 모듈 단위 분산 생산, 조립 공정 표준화"],["C 군용 저가 소모형","보관·전개","장기 보관 후 점검만으로 운용, 표준 컨테이너 적재"],["C 군용 저가 소모형","임무 베이","전원·데이터·기계 체결 표준 인터페이스(임무장비는 체계업체 소관)"],["D 국가중요시설 감시·정찰형","상시 경계","2척 교대 24시간 순찰, 1척 연속 8시간 이상(안), 계류 도크 자동 충전(안)"],["D 국가중요시설 감시·정찰형","탐지·식별","소형 레이더 + 주야간 EO/IR + AIS 대조, 미식별 선박 탐지·추적(탐지 거리는 시험으로 확정)"],["D 국가중요시설 감시·정찰형","경계구역","다중 지오펜스(접근 경고·진입 금지), 침입 시 자동 경보·추적·영상 전송"],["D 국가중요시설 감시·정찰형","비살상 대응","경고 방송·탐조등만. 무장·차단 장비 없음"],["D 국가중요시설 감시·정찰형","관제 연동","보안관제센터 영상관제(VMS) 표준 연동, 해경 상황실 공유(IF-10 확장)"],["D 국가중요시설 감시·정찰형","보안","링크 암호화, 영상·로그 국내 보관, 시설 반입 보안검토·보안적합성 [확인 필요]"]],
+    elem: [["전원","배터리 팩(셀·BMS)","리튬이온, 주전원 48V(안), 셀 감시","CAN","국내 셀 + 당사 조립"],["전원","전원 분배(PDU)","채널별 차단·전류 측정, 원격 온·오프","CAN, 전원","당사 개발"],["전원","DC-DC 변환기","48V → 24·12·5V(안)","전원","상용(비중국산)"],["전원","충전·급전 포트","방수 커넥터, 육상 충전","전원","상용"],["전원","비상 차단 스위치","물리 스위치 + 원격 차단","전원, CAN","상용"],["전장 함체","방수 함체","IP67 이상, 내식 재질","기계","당사 설계·부산 협력사"],["전장 함체","냉각·열교환 유닛","해수 열교환 또는 방열판(시험 후 선정)","CAN, 전원","당사 개발"],["전장 함체","제습 장치","결로 방지","CAN, 전원","당사 개발"],["전장 함체","온습도·누수 센서","함체별 다점 측정","CAN","상용"],["전장 함체","방수 케이블 글랜드","IP67 관통부","기계","상용"],["통신","LTE/5G 모뎀","국내 인증 제품","Ethernet","상용"],["통신","메시 무전기","다수 선체 중계, KC·주파수 확인","Ethernet","상용(비중국산)"],["통신","위성 단말","예비 링크","Ethernet","상용(사업자 미결)"],["통신","AIS 송수신기","민간 Class B, 군용 송신 제어","NMEA","상용"],["통신","링크 관리기","우선순위·자동 전환, 암호화","Ethernet","당사 SW + 상용"],["항법·자율","GNSS 수신기","GPS·Galileo, KASS 보정","NMEA/시리얼","상용"],["항법·자율","관성센서(IMU)","GNSS 교란 시 보조 항법","시리얼/CAN","상용"],["항법·자율","운항 제어기","조타·추진 제어, 안전 동작","MAVLink 2, CAN","상용 + 당사 설정"],["항법·자율","임무 컴퓨터","경로 계획·영상 처리","Ethernet, DDS","상용 보드"],["항법·자율","자율·충돌회피 SW","AIS·영상 기반 회피","DDS","협력·라이선스"]],
+    comm: [["지상–선체 제어","MAVLink 2","운항 명령·상태 보고","오픈 규격, 메시지 서명 지원. 군 상호운용엔 매핑 필요","A·B 기본, C는 게이트웨이"],["해양 무인체 자율 구조","UMAA(미 해군, DDS 기반)","군 체계 메시지 호환","국내 실증(한화시스템)이 호환 목표. 국내 군 채택은 미확정","C 매핑 대상"],["내부 고속 데이터","Ethernet + DDS(ROS 2)","센서·임무컴퓨터·영상","상용 부품 많음, UMAA와 같은 DDS 계열","전 모델 백본"],["내부 저속 제어","CAN / CAN FD(ISO 11898)","추진·BMS·PDU·열관리","노이즈에 강하고 배선 단순","전 모델 제어 버스"],["해양 전자장비","NMEA 2000 / 0183","GNSS·풍향풍속·수심계","상용 해양 센서 대부분 지원","B 관측 센서"],["선박 식별","AIS(ITU-R M.1371)","주변 선박 인지·자선 송신","민간 운항 안전에 필수","A·B 송수신, C 송신 제어"],["광역 무선","LTE/5G 상용망","연안 주 링크","저비용·고속, 해상 커버리지 한계","A·B 주 링크"],["직접 무선","전용 무선·메시","직결·다수 선체 중계","전파법 적합성평가(KC)·허가 확인","예비 링크"],["위성","비중국산 위성 단말","원거리·예비","사업자·보안 요건 미결, 단일망 의존 회피","B·C 예비"],["위치","GNSS 다중, KASS 보정","항법","교란 대비 관성센서 보조","전 모델"],["영상","RTSP/RTP, H.264/H.265","실시간 영상","대역폭에 따른 화질 조절","A·B"],["보안","KCMVP 암호모듈, 링크 암호화","제어·데이터 보호","군·공공 납품 시 요구 가능","전 모델"]],
+    icd: [["IF-01","지상통제소 ↔ 선체","LTE/5G","MAVLink 2 over IP, 암호화","주 링크"],["IF-02","지상통제소 ↔ 선체","전용 무선·메시","MAVLink 2","예비, 주파수 허가 확인"],["IF-03","선체 ↔ 위성","위성 단말","IP","B·C 예비"],["IF-04","선체 ↔ 주변 선박","VHF","AIS(ITU-R M.1371)","C는 송신 제어"],["IF-05","임무 컴퓨터 ↔ 센서·영상","Ethernet","DDS, RTSP/RTP","내부 고속"],["IF-06","운항 제어기 ↔ 추진·BMS·PDU·열관리","CAN FD","당사 메시지 사전(부록)","내부 제어"],["IF-07","관측 센서·AIS·GNSS ↔ NMEA GW","NMEA 2000/0183","PGN·문장","B 관측"],["IF-08","임무 베이 ↔ 선체","전원+Ethernet+CAN+기계","표준 커넥터·체결구(안)","C는 인터페이스만 합의"],["IF-09","PDU → 전 엘리먼트","전원 레일","48V(안), 24·12·5V(안)","채널별 차단·계측"],["IF-10","지상통제소 → 상황실","IP","영상 스트림·상태 API","기관별 협의"]],
+    sup: [["부품 원산지","BOM 증빙, 중국산 0건","미 FCC 외국산 드론 신규 인증 차단(2025.12), 국방부 상용드론 군용 인증(추진)"],["양산","모듈별 조립·시험 절차서, 지그 조립, 협력사 분산","당사 품질기록"],["방수·환경","IP67 이상, 염무·진동·충격","IEC 60529, 군 납품 시 MIL-STD-810 계열"],["전자파","방사·내성","전파법 적합성평가(KC), 군 납품 시 MIL-STD-461 계열"],["배터리","운송·안전","UN 38.3, IEC 62619"],["커넥터","해수용 방수, 군 납품분 군용 규격 동등 이상","MIL-DTL-38999 계열 참고"],["실증","실해역 시험","자율운항선박법 실증특례, 부산·경북 규제자유특구"],["군용","방산·보안·수출","방위사업법, 총포·도검·화약류법(화약류 미취급), 대외무역법 전략물자"]],
+    ver: [["모듈 시험","COM-05·06·07","방수 시험, 고온·고습 챔버, 센서 주입","방수 등급, 결로·정격 초과 없음, 경보 동작"],["통합 시험","COM-02·03·04·10","모듈 교체 시연, 링크 강제 차단, 암호화 확인","교체 시간, 자동 전환, 안전 동작"],["실해역 시험","모델별 요구","특구 해역 운항, 운용시간 측정","목표(안) 달성, 로그 확보"],["문서 검증","COM-01","BOM 원산지 감사","중국산 0건"]],
+    open: ["모델 A·B 성능 목표(속도·운용시간·중량) 확정","모델 C: 수요군 ROC와 체계업체 임무장비 인터페이스 요구 수령","모델 D: 원전 운영사·항만공사의 경계구역·탐지 거리·관제 연동 요구, 방호구역 장비 반입·통신 허가와 보안적합성 요건 확인","위성 통신 사업자 선정(비중국산, 군 보안 요건)","전용 무선 주파수·출력 허가 검토","UMAA 등 군 상호운용 규격의 국내 채택 여부 확인","주요 부품 견적과 원산지 증빙 확보"]
+  };
+  const $ = s => document.querySelector(s);
+  const el = (t, a, x) => { const e = document.createElement(t); if (a) for (const k in a) e.setAttribute(k, a[k]); if (x != null) e.textContent = x; return e; };
+  function table(id, head, rows, idCol){
+    const t = $(id); const tr = el("tr"); head.forEach(h => tr.append(el("th", null, h))); const th = el("thead"); th.append(tr); const tb = el("tbody");
+    rows.forEach(r => { const row = el("tr"); r.forEach((c, i) => row.append(el("td", i === 0 && idCol ? {class:"id"} : null, c))); tb.append(row); });
+    t.replaceChildren(th, tb);
+  }
+  table("#t-com", ["ID","요구사항","목표","검증"], D.com, true);
+  table("#t-model", ["모델","항목","목표(안)"], D.model);
+  table("#t-elem", ["서브시스템","엘리먼트","주요 사양(안)","인터페이스","조달"], D.elem);
+  table("#t-comm", ["구분","규격","용도","검토 의견","권고"], D.comm);
+  table("#t-icd", ["IF ID","연결","물리 계층","프로토콜·규격","비고"], D.icd, true);
+  table("#t-sup", ["구분","요구","관련 규격·제도"], D.sup);
+  table("#t-ver", ["단계","대상 요구","방법","합격 기준"], D.ver);
+  D.open.forEach(o => $("#l-open").append(el("li", null, o)));
+  [["4","제안 모델"],["9","선체 서브시스템"],["20","핵심 엘리먼트"],["10","공통 요구"],["10","인터페이스(ICD)"],["12","검토 통신 규격"],["0","중국산 부품 목표"]].forEach(([v,k]) => { const d = el("div",{class:"kpi"}); d.append(el("b",null,v), el("span",null,k)); $("#kpis").append(d); });
+
+  // SVG 생성: 엘리먼트 구성도
+  const NS = "http://www.w3.org/2000/svg";
+  const s = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  (function(){
+    const g = $("#svg-elem");
+    g.append(s("text", {class:"tx", x:24, y:30, "font-size":15, "font-weight":600}, "L2 엘리먼트 구성도 · 핵심 서브시스템 4개, 엘리먼트 20개"));
+    const cols = [["전원","당사 개발","core"],["전장 함체·열관리","당사 개발","core"],["통신","상용부품 조립","plain"],["항법·자율","협력 + 상용부품","partner"]];
+    cols.forEach((c, ci) => {
+      const x = 24 + ci * 182, items = D.elem.filter(r => r[0] === (ci === 1 ? "전장 함체" : c[0])).map(r => r[1]);
+      g.append(s("rect", {class: c[2] === "core" ? "bt" : c[2] === "partner" ? "bp" : "bx", x, y:56, width:166, height:316, rx:8}));
+      g.append(s("text", {class:"tx", x:x+14, y:80, "font-size":13, "font-weight":600}, c[0]));
+      g.append(s("text", {class:"tq", x:x+14, y:98, "font-size":11.5}, c[1]));
+      items.forEach((it, i) => {
+        g.append(s("rect", {class: c[2] === "core" ? "bc" : "bx", x:x+12, y:116+i*50, width:142, height:40, rx:6}));
+        g.append(s("text", {class:"tx", x:x+83, y:141+i*50, "text-anchor":"middle"}, it));
+      });
+    });
+  })();
+  // SVG 생성: 인터페이스 버스도
+  (function(){
+    const g = $("#svg-bus"), eth = 176, can = 286, rail = 404;
+    g.append(s("text", {class:"tx", x:24, y:30, "font-size":15, "font-weight":600}, "두 개의 버스와 전원 레일로 모든 엘리먼트를 묶는다"));
+    g.append(s("line", {class:"eth", x1:40, y1:eth, x2:720, y2:eth})); g.append(s("line", {class:"can", x1:40, y1:can, x2:720, y2:can})); g.append(s("line", {class:"rail", x1:40, y1:rail, x2:720, y2:rail}));
+    const up = [["링크 관리기",0],["임무 컴퓨터",0],["EO/IR·열화상",0],["상태감시 GW",1],["임무 베이",0],["NMEA 게이트웨이",0]];
+    up.forEach(([n, hl], i) => { const x = 48 + i * 112; g.append(s("line", {class:"ln", x1:x+52, y1:140, x2:x+52, y2:eth})); g.append(s("rect", {class: hl ? "bc" : "bx", x, y:92, width:104, height:48, rx:8})); g.append(s("text", {class:"tx", x:x+52, y:120, "text-anchor":"middle", "font-weight": hl ? 600 : 400}, n)); });
+    g.append(s("line", {class:"ln", x1:100, y1:92, x2:100, y2:70})); g.append(s("text", {class:"tq", x:108, y:66}, "LTE·메시·위성 안테나"));
+    g.append(s("line", {class:"ln", x1:660, y1:92, x2:660, y2:70})); g.append(s("text", {class:"tq", x:652, y:66, "text-anchor":"end"}, "AIS·GNSS·관측 센서"));
+    g.append(s("line", {class:"ln", x1:380, y1:eth, x2:380, y2:206})); g.append(s("line", {class:"ln", x1:380, y1:254, x2:380, y2:can}));
+    g.append(s("rect", {class:"bx", x:300, y:206, width:160, height:48, rx:8})); g.append(s("text", {class:"tx", x:380, y:228, "text-anchor":"middle", "font-size":13, "font-weight":600}, "운항 제어기")); g.append(s("text", {class:"tq", x:380, y:246, "text-anchor":"middle"}, "MAVLink 2 ↔ CAN"));
+    const dn = [["추진 모터 제어",0],["BMS",1],["PDU",1],["열관리 제어기",1],["비상 차단",0]];
+    dn.forEach(([n, hl], i) => { const x = 56 + i * 132; g.append(s("line", {class:"ln", x1:x+60, y1:can, x2:x+60, y2:316})); g.append(s("rect", {class: hl ? "bc" : "bx", x, y:316, width:120, height:48, rx:8})); g.append(s("text", {class:"tx", x:x+60, y:344, "text-anchor":"middle", "font-weight": hl ? 600 : 400}, n)); });
+    g.append(s("text", {class:"tx", x:40, y:eth+20, "font-weight":600}, "Ethernet 백본 (DDS·RTSP)"));
+    g.append(s("text", {class:"tx", x:40, y:can-8, "font-weight":600}, "CAN FD 제어 버스"));
+    g.append(s("text", {class:"tx", x:40, y:rail+22, "font-weight":600}, "전원 레일: 주전원 48V(안) → PDU → 24·12·5V(안), 모든 엘리먼트에 급전"));
+  })();
+
+  // 내비게이션 (#앵커로 바로 열기 지원)
+  const ids = ["home","mon","prop","bench","war","sites","law","req","arch","elem","comm","icd","verify","sim","design"];
+  function go(id, push){
+    if (!ids.includes(id)) id = "home";
+    ids.forEach(x => { document.getElementById(x).hidden = x !== id; });
+    document.querySelectorAll(".menu [data-go]").forEach(b => b.setAttribute("aria-current", b.dataset.go === id ? "page" : "false"));
+    document.querySelectorAll(".menu .ng").forEach(g => { g.classList.toggle("active", !!g.querySelector('[data-go="' + id + '"]')); g.classList.remove("open"); });
+    if (push) { try { history.replaceState(null, "", "#" + id); } catch (e) {} }
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go, true)));
+  window.__go = id => go(id, true);
+  go((location.hash || "#home").slice(1), false);
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+/* 과제 모니터링 + 제안서 작성 (db: calls, drafts, meta/status, company/profile) */
+(function(){
+  const $ = s => document.querySelector(s);
+  const el = (tag, attrs, text) => { const e = document.createElement(tag); if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const cls = {"접수중":"st-open","예정":"st-soon","마감":"st-closed","참고":"st-ref"};
+  const order = {"접수중":0,"예정":1,"참고":2,"마감":3};
+  let rows = [], drafts = {}, profile = "", db = null, sample = null, downloads = null, sortK = "fit", sortDir = -1, ctl = null;
+  const now = () => new Date().toLocaleString("ko-KR", {timeZone:"Asia/Seoul"});
+  const isRec = r => (r.status === "접수중" || r.status === "예정") && (r.fit || 0) >= 4;
+  const recList = () => rows.filter(isRec).sort((a, b) => (b.fit||0) - (a.fit||0) || (order[a.status]??9) - (order[b.status]??9) || String(a.deadline||"9").localeCompare(String(b.deadline||"9")));
+  function dday(d){ if(!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return ""; const n = Math.ceil((new Date(d + "T23:59:59+09:00") - Date.now()) / 86400000); return n >= 0 ? "D-" + n : ""; }
+
+  function stats(){
+    const box = $("#mstats"); box.replaceChildren(); const c = s => rows.filter(r => r.status === s).length, rec = rows.filter(isRec).length;
+    [[rows.length,"전체 공고"],[c("접수중"),"접수중"],[c("예정"),"예정"],[rec,"권고 과제"],[Object.keys(drafts).length,"작성된 제안서"]].forEach(([v,k]) => { const d = el("div",{class:"kpi"}); d.append(el("b",null,String(v)), el("span",null,k)); box.append(d); });
+    const nb = $("#nav-rec"); nb.hidden = !rec; nb.textContent = rec;
+  }
+  function renderTable(){
+    const st = $("#f-status").value, cat = $("#f-cat").value, q = $("#f-q").value.trim().toLowerCase();
+    const list = rows.filter(r => (st === "all" || r.status === st) && (cat === "all" || r.category === cat) && (!q || ((r.title||"") + (r.agency||"")).toLowerCase().includes(q)));
+    list.sort((a, b) => { let va = a[sortK], vb = b[sortK];
+      if (sortK === "status") { va = order[va] ?? 9; vb = order[vb] ?? 9; } if (sortK === "fit") { va = va || 0; vb = vb || 0; }
+      if (va == null) va = ""; if (vb == null) vb = "";
+      const r = typeof va === "number" ? va - vb : String(va).localeCompare(String(vb), "ko"); return r * sortDir || (order[a.status] ?? 9) - (order[b.status] ?? 9); });
+    const body = $("#grid-body"); body.replaceChildren();
+    if (!list.length) { const tr = el("tr"); tr.append(el("td", {colspan:"8", class:"cap"}, rows.length ? "조건에 맞는 공고가 없습니다." : "아직 수집된 공고가 없습니다.")); body.append(tr); return; }
+    for (const r of list) {
+      const tr = el("tr");
+      tr.append(el("td", {class:"num fit" + ((r.fit||0) >= 4 ? " hi" : "")}, String(r.fit ?? "-")));
+      const s = el("td"); s.append(el("span", {class:"pill " + (cls[r.status] || "")}, r.status || "-")); tr.append(s);
+      const t = el("td"); if (r.url) t.append(el("a", {href:r.url, target:"_blank", rel:"noopener"}, r.title || "(제목 없음)")); else t.textContent = r.title || ""; tr.append(t);
+      tr.append(el("td", null, r.agency || ""), el("td", null, r.category || ""), el("td", {class:"num"}, r.posted || ""));
+      const dd = dday(r.deadline); tr.append(el("td", {class:"num"}, (r.deadline || "") + (dd && r.status === "접수중" ? " (" + dd + ")" : "")));
+      tr.append(el("td", null, r.budget || "")); body.append(tr);
+    }
+  }
+  document.querySelectorAll("#grid th").forEach(th => th.addEventListener("click", () => {
+    const k = th.dataset.k; sortDir = sortK === k ? -sortDir : (k === "fit" ? -1 : 1); sortK = k;
+    document.querySelectorAll("#grid th").forEach(x => x.removeAttribute("aria-sort")); th.setAttribute("aria-sort", sortDir < 0 ? "descending" : "ascending"); renderTable();
+  }));
+  ["#f-status", "#f-cat", "#f-q"].forEach(s => $(s).addEventListener("input", renderTable));
+
+  function card(r, i, compact){
+    const c = el("article", {class:"card" + (i === 0 ? " top" : "")}), head = el("div", {class:"row"});
+    head.append(el("span", {class:"pill " + (cls[r.status]||"")}, r.status), el("span", {class:"fit hi"}, "적합도 " + r.fit));
+    if (r.focus) head.append(el("span", {class:"pill"}, "관심 · " + r.focus));
+    const dd = dday(r.deadline); if (dd && r.status === "접수중") head.append(el("span", {class:"pill"}, dd));
+    if (drafts[r.id]) head.append(el("span", {class:"pill"}, "제안서 있음"));
+    c.append(head, el("div", {class:"t"}, (i === 0 ? "1순위 · " : "") + r.title));
+    c.append(el("div", {class:"m"}, [r.agency, r.deadline ? "마감 " + r.deadline : r.posted, r.budget].filter(Boolean).join(" · ")));
+    if (r.relevance && !compact) c.append(el("div", null, "권고 이유: " + r.relevance));
+    if (r.next && !compact) c.append(el("div", {class:"m"}, "다음 행동: " + r.next));
+    const act = el("div", {class:"row"}), b = el("button", {type:"button", class:"btn primary"}, drafts[r.id] ? "제안서 열기" : "제안서 작성");
+    b.addEventListener("click", () => openDraft(r.id)); act.append(b);
+    if (r.url) act.append(el("a", {href:r.url, target:"_blank", rel:"noopener", class:"btn"}, "원문 ↗"));
+    c.append(act); return c;
+  }
+  function renderRec(){
+    const list = recList(), box = $("#rec-list"), home = $("#home-rec"); box.replaceChildren(); home.replaceChildren();
+    if (!list.length) { const m = db ? "지금 권고할 과제가 없습니다. 매일 아침 갱신 때 다시 확인합니다." : "서버에 연결된 상태에서 열어야 과제가 보입니다."; box.append(el("div", {class:"empty"}, m)); home.append(el("div", {class:"empty"}, m)); return; }
+    list.forEach((r, i) => box.append(card(r, i)));
+    list.slice(0, 3).forEach((r, i) => home.append(card(r, i, true)));
+  }
+  function fillSelect(){
+    const s = $("#d-call"), cur = s.value; s.replaceChildren();
+    const list = rows.filter(r => r.status !== "마감").sort((a, b) => (b.fit||0) - (a.fit||0));
+    for (const r of list) s.append(el("option", {value:r.id}, "[" + (r.fit ?? "-") + "] " + r.title + (drafts[r.id] ? " · 제안서 있음" : "")));
+    if (cur && list.some(r => r.id === cur)) s.value = cur;
+  }
+  function openDraft(id){ window.__go("prop"); fillSelect(); $("#d-call").value = id; loadDraft(); }
+  function loadDraft(){
+    const id = $("#d-call").value, d = drafts[id]; $("#d-text").value = d ? d.md || "" : "";
+    $("#d-status").textContent = d ? "저장된 제안서(" + (d.source === "auto" ? "자동 작성" : "직접 작성") + ", " + (d.updated || "") + ")를 불러왔습니다." : id ? "저장된 제안서가 없습니다. ‘제안서 작성’을 누르세요." : "";
+  }
+  $("#d-call").addEventListener("change", loadDraft);
+
+  const PRD_BRIEF = "공통 플랫폼 3모델: A 인명구조형(3m급, 해경·소방, 열화상 탐색·구조부이 원격 분리, 1시간 이상 운용 안), B 해양관측형(6m급, 해수부·지자체, 경로점 자율항해·AIS 충돌회피, 기상·수질·유출유 감지 센서, 8시간 이상 안), C 군용 저가 소모형 플랫폼(6~7m급 이하, 성능은 수요군 ROC, 임무 베이 표준 인터페이스까지만 정의, 임무장비는 체계업체 소관). 선체 서브시스템 9개(선체·구조, 추진, 전원*, 전장 함체·열관리*, 통신, 항법·자율(협력·라이선스), 센서, 상태감시*, 임무 베이), 지상통제소 3개(관제 SW, 통신 단말, 운반·진수 장비). *는 당사 핵심기술. 핵심 엘리먼트 20개: 전원(배터리 팩·BMS 48V 안, PDU 채널별 차단·계측, DC-DC 24/12/5V, 충전 포트, 비상 차단), 전장 함체(IP67 함체, 해수 열교환/방열판, 제습, 온습도·누수 센서, 글랜드), 통신(LTE/5G, 메시 무전기, 위성 단말 예비, AIS, 링크 관리기), 항법·자율(GNSS+KASS, IMU, 운항 제어기, 임무 컴퓨터, 자율·충돌회피 SW). 내부 인터페이스: Ethernet+DDS(ROS 2) 백본, CAN FD(ISO 11898) 제어 버스, 48V 전원 레일. 외부: MAVLink 2(LTE·메시, 암호화), 위성 예비, AIS(ITU-R M.1371), NMEA 2000/0183 센서, RTSP H.264/265 영상. 군용은 같은 버스 위에 UMAA(DDS) 매핑 게이트웨이. 공통 요구 COM-01~10: 중국산 부품 0건(BOM 원산지 증빙), 4개 모듈·현장 교체 30분(안), 통신 이중화·자동 전환, 두절 시 복귀/정지, IP67, 열·습도 관리, 실시간 상태감시·경보, 로그, 1인 운용, KCMVP 암호. 인증·규격: IEC 60529, MIL-STD-810/461(군 납품 시), 전파법 KC, UN 38.3, IEC 62619, MIL-DTL-38999 참고. 검증: 모듈 시험→통합 시험→부산·경북 규제자유특구 실해역 시험. 수치는 모두 초기 목표안.";
+  function buildPrompt(r){
+    return "당신은 한국 정부 R&D·국방 연구개발 과제의 연구개발계획서 작성 전문가입니다. 아래 회사 역량, 제품 요구사항(PRD), 공고 정보만 근거로 평가위원에게 그대로 제출할 수 있는 수준의 제안서(연구개발계획서) 본문을 한국어 마크다운으로 작성하세요. 개요가 아니라 각 항목을 완결된 문단·표로 충분히 서술합니다.\n\n" +
+      "규칙:\n- 구성: # 과제명, ## 요약문(목표·내용·기대효과 각 3줄 이내), ## 1. 연구개발과제의 개요(표: 공고명·기관·접수기간·과제명·주관기관·연구기간·연구개발비), ## 2. 연구개발의 필요성(국내외 현황·문제점·관련 법규·정책), ## 3. 연구개발 목표(최종·단계별 목표, 표: 평가항목·단위·목표치·측정방법), ## 4. 연구개발 내용(세부 과제별, PRD의 시스템 구성·엘리먼트·통신 규격·인터페이스를 공고 범위에 맞게 골라 반영), ## 5. 추진 전략·방법 및 추진체계(기관별 역할 표, 참여인력), ## 6. 수행기관 역량(실적·보유기술·인프라 표), ## 7. 연구개발 일정(단계·월별 표), ## 8. 연구개발비 사용 계획(비목 표), ## 9. 성과 활용 방안과 기대효과(사업화 계획), ## 10. 지식재산권 확보 계획, ## 11. 보안·연구안전 관리, ## 12. 위험 요소와 대응, ## 제출 전 확인 목록(체크 목록).\n" +
+      "- 공고·회사 역량·PRD에 없는 수치·일정·예산·실적은 지어내지 말고 [확인 필요]로 적으세요. PRD의 '안' 수치는 목표안으로 표기하세요.\n- 작은 회사지만 신사업에 역량을 집중하는 의지와 실제 실적·프로토타입 일정으로 실행력을 보여주세요.\n- 중국산 부품 배제 원칙을 반영하세요.\n- 무기의 탄두·신관·유도·표적화 설계는 다루지 말고 정부 지정 체계업체 소관으로 적으세요.\n- 문장은 짧고 구체적으로, 평가항목(필요성·목표 타당성·내용 구체성·수행역량·활용성)마다 근거를 제시하세요.\n\n" +
+      "[회사 역량]\n" + (profile || "(회사 역량 미입력)") + "\n\n[제품 요구사항(PRD) 요약]\n" + PRD_BRIEF + "\n\n[공고 정보]\n" +
+      ["공고명: " + r.title, "기관: " + (r.agency||""), "구분: " + (r.category||""), "상태: " + (r.status||""), "공고일: " + (r.posted||""), "마감: " + (r.deadline||"확인 필요"), "규모: " + (r.budget||"확인 필요"), "관련성 메모: " + (r.relevance||""), "다음 행동 메모: " + (r.next||""), "원문: " + (r.url||"")].join("\n");
+  }
+  $("#d-gen").addEventListener("click", async () => {
+    const id = $("#d-call").value, r = rows.find(x => x.id === id);
+    if (!r) { $("#d-status").textContent = "먼저 과제를 고르세요."; return; }
+    if (!sample) { $("#d-status").textContent = "이 화면에서는 제안서 작성 기능을 쓸 수 없습니다. 서버 연결과 API 키 설정을 확인하세요."; return; }
+    if (drafts[id] && $("#d-text").value.trim() && !confirmNew) { confirmNew = true; $("#d-status").textContent = "저장된 제안서가 있습니다. 새로 작성하려면 한 번 더 누르세요(저장 전까지는 기존본이 유지됩니다)."; return; }
+    confirmNew = false; ctl = new AbortController();
+    $("#d-gen").disabled = true; $("#d-stop").hidden = false; $("#d-status").textContent = "제안서를 작성하는 중입니다… (수 분 걸릴 수 있습니다)";
+    try {
+      await sample(buildPrompt(r), { modelTier: "complex", cache: false, signal: ctl.signal, onText: ({text}) => { $("#d-text").value = text; } });
+      $("#d-status").textContent = "작성했습니다. 검토·수정 후 ‘저장’을 누르세요.";
+    } catch (e) {
+      $("#d-status").textContent = e && e.code === "not_granted" ? "제안서 작성 권한이 허용되지 않았습니다." : e && e.code === "rate_limited" ? "요청이 많습니다. 잠시 뒤 다시 시도하세요." : e && e.code === "unavailable" ? (e.message || "서버에서 Claude 호출을 쓸 수 없습니다.") : e && e.code === "aborted" ? "작성을 중지했습니다." : "작성이 중단되었습니다." + (e && e.message ? " (" + e.message.slice(0, 120) + ")" : "");
+    } finally { $("#d-gen").disabled = false; $("#d-stop").hidden = true; ctl = null; }
+  });
+  let confirmNew = false;
+  $("#d-call").addEventListener("change", () => { confirmNew = false; });
+  $("#d-stop").addEventListener("click", () => { if (ctl) ctl.abort(); });
+  $("#d-save").addEventListener("click", async () => {
+    const id = $("#d-call").value, md = $("#d-text").value;
+    if (!id || !md.trim()) { $("#d-status").textContent = "저장할 내용이 없습니다."; return; }
+    if (!db) { $("#d-status").textContent = "서버에 연결된 상태에서만 저장할 수 있습니다."; return; }
+    try { await db.doc("drafts/" + id).set({ md, source: "manual", updated: now() }); $("#d-status").textContent = "저장했습니다."; }
+    catch (e) { $("#d-status").textContent = "저장하지 못했습니다. 편집 권한을 확인하세요."; }
+  });
+
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  function mdToHtml(md){
+    const out = []; let list = null, table = null;
+    const flush = () => { if (list) { out.push("</" + list + ">"); list = null; } if (table) { out.push("</table>"); table = null; } };
+    for (const raw of md.split(/\r?\n/)) {
+      const l = raw.trimEnd(); let m;
+      if (/^\|/.test(l)) { if (/^\|[\s:|-]+\|$/.test(l)) continue; if (!table) { flush(); out.push('<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%">'); table = "t"; } out.push("<tr>" + l.replace(/^\||\|$/g, "").split("|").map(c => "<td>" + inline(c.trim()) + "</td>").join("") + "</tr>"); continue; }
+      if ((m = l.match(/^(#{1,4})\s+(.*)/))) { flush(); const h = Math.min(m[1].length, 3); out.push("<h" + h + ">" + inline(m[2]) + "</h" + h + ">"); continue; }
+      if ((m = l.match(/^\s*[-*]\s+(.*)/))) { if (list !== "ul") { flush(); out.push("<ul>"); list = "ul"; } out.push("<li>" + inline(m[1].replace(/^\[[ xX]\]\s*/, "☐ ")) + "</li>"); continue; }
+      if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== "ol") { flush(); out.push("<ol>"); list = "ol"; } out.push("<li>" + inline(m[1]) + "</li>"); continue; }
+      flush(); if (l.trim()) out.push("<p>" + inline(l) + "</p>");
+    }
+    flush(); return out.join("\n");
+  }
+  function fname(ext){ const r = rows.find(x => x.id === $("#d-call").value); return ((r ? r.title : "제안서").replace(/[\\/:*?"<>|\[\]]/g, "").slice(0, 60) || "제안서") + "_제안서." + ext; }
+  async function save(ext, data){
+    if (!downloads) { $("#d-status").textContent = "이 화면에서는 내려받기를 쓸 수 없습니다. 본문을 복사해 사용하세요."; return; }
+    try { await downloads.save({ filename: fname(ext), data }); } catch (e) { $("#d-status").textContent = e && e.code === "declined" ? "내려받기를 취소했습니다." : "내려받지 못했습니다."; }
+  }
+  $("#d-md").addEventListener("click", () => { const t = $("#d-text").value; if (t.trim()) save("md", t); });
+  $("#d-word").addEventListener("click", async () => {
+    const t = $("#d-text").value; if (!t.trim()) return;
+    if (!window.JSZip) { $("#d-status").textContent = "Word 변환 도구를 불러오지 못했습니다. 텍스트(.md)로 내려받으세요."; return; }
+    const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:"Malgun Gothic",sans-serif;font-size:11pt;line-height:1.6}h1{font-size:18pt}h2{font-size:14pt}h3{font-size:12pt}td{font-size:10pt;vertical-align:top}</style></head><body>' + mdToHtml(t) + "</body></html>";
+    const z = new JSZip();
+    z.file("[Content_Types].xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="html" ContentType="text/html"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
+    z.file("_rels/.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+    z.file("word/document.xml", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body><w:altChunk r:id="htmlChunk"/><w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>');
+    z.file("word/_rels/document.xml.rels", '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="htmlChunk" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk" Target="chunk.html"/></Relationships>');
+    z.file("word/chunk.html", html);
+    const blob = await z.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    save("docx", blob);
+  });
+
+  $("#p-save").addEventListener("click", async () => {
+    if (!db) { $("#p-status").textContent = "서버에 연결된 상태에서만 저장할 수 있습니다."; return; }
+    try { await db.doc("company/profile").set({ text: $("#p-text").value, updated: now() }); $("#p-status").textContent = "저장했습니다. 내일 아침 평가부터 반영됩니다."; }
+    catch (e) { $("#p-status").textContent = "저장하지 못했습니다. 편집 권한을 확인하세요."; }
+  });
+
+  function renderAll(){ stats(); renderTable(); renderRec(); fillSelect(); }
+  stats(); renderRec();
+  (async () => {
+    db = window.claude ? await window.claude.use("db") : null;
+    if (!db) { $("#grid-body").replaceChildren(); const tr = el("tr"); tr.append(el("td", {colspan:"8", class:"cap"}, "서버에 연결된 상태에서 열어야 공고가 보입니다.")); $("#grid-body").append(tr); $("#lastrun").textContent = ""; $("#home-lastrun").textContent = ""; renderRec(); return; }
+    db.collection("calls").onSnapshot(s => { rows = s.docs.map(d => ({ id: d.id, ...(d.data() || {}) })); renderAll(); }, () => { $("#lastrun").textContent = "공고를 불러오지 못했습니다. 페이지를 새로 열어 주세요."; });
+    db.collection("drafts").onSnapshot(s => { drafts = {}; s.docs.forEach(d => { drafts[d.id] = d.data() || {}; }); renderAll(); if (!$("#prop").hidden && !$("#d-text").value) loadDraft(); }, () => {});
+    db.doc("meta/status").onSnapshot(d => { const v = d.data(), t = v ? "마지막 자동 갱신 " + (v.lastRun || "-") + (v.note ? " · " + v.note : "") : "아직 자동 갱신 기록이 없습니다."; $("#lastrun").textContent = t; $("#home-lastrun").textContent = t; }, () => {});
+    db.doc("company/profile").onSnapshot(d => { const v = d.data(); profile = v ? v.text || "" : ""; if (document.activeElement !== $("#p-text")) $("#p-text").value = profile; }, () => {});
+  })();
+  (async () => { sample = window.claude ? await window.claude.use("sample") : null; downloads = window.claude ? await window.claude.use("downloads") : null; })();
+})();
+</script>
+<script>
+/* 경쟁·참고 제품, 전황 모니터링, 주요 사이트 (db: products, news, war) */
+(function(){
+  const $ = s => document.querySelector(s);
+  const el = (tag, attrs, text) => { const e = document.createElement(tag); if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; };
+  const safe = u => /^https?:\/\//.test(u || "") ? u : null;
+  let prods = [], news = [], war = {};
+  const OURS = [
+    {name:"당사 모델 A 인명구조형", maker:"당사", country:"한국", domain:"수상", role:"인명구조", length:"3m급", speed:"확인 필요", range:"운용 1시간 이상(안)", payload:"열화상·주간 카메라, 구조부이 원격 분리", cost:"확인 필요", status:"2027 초 프로토타입 목표", compare:"A", note:"차량 적재·2인 진수, 중국산 0건", photo:"img/ours/model-a.jpg", photoCredit:"당사 3D 렌더링 · 실물 아님", photoNote:"가상 프로토타입(3D 렌더링)"},
+    {name:"당사 모델 B 해양관측형", maker:"당사", country:"한국", domain:"수상", role:"해양관측", length:"6m급", speed:"확인 필요", range:"운용 8시간 이상(안)", payload:"기상·수질·유출유 감지 센서", cost:"확인 필요", status:"설계", compare:"B", note:"경로점 자율항해·AIS 충돌회피", photo:"img/ours/model-b.jpg", photoCredit:"당사 3D 렌더링 · 실물 아님", photoNote:"가상 프로토타입(3D 렌더링)"},
+    {name:"당사 모델 C 군용 저가 소모형 플랫폼", maker:"당사", country:"한국", domain:"수상", role:"소모형 플랫폼", length:"6~7m급 이하", speed:"수요군 ROC", range:"수요군 ROC", payload:"임무 베이 표준 인터페이스(임무장비는 체계업체 소관)", cost:"확인 필요(저가 목표)", status:"설계", compare:"C", note:"상용부품·모듈 분산 생산, 표준 컨테이너 보관", photo:"img/ours/model-c.jpg", photoCredit:"당사 3D 렌더링 · 실물 아님", photoNote:"가상 프로토타입(3D 렌더링)"},
+    {name:"당사 모델 D 국가중요시설 감시·정찰형", maker:"당사", country:"한국", domain:"수상", role:"경계 감시·정찰", length:"4~5m급(안)", speed:"확인 필요", range:"1척 연속 8시간 이상(안), 2척 교대 24시간", payload:"소형 레이더·주야간 EO/IR·경고 방송·탐조등(무장 없음)", cost:"확인 필요", status:"기획", compare:"D", note:"원전 취·배수구 해역·국가주요항만 경계, 보안관제센터 연동", photo:"img/ours/model-d.jpg", photoCredit:"당사 3D 렌더링 · 실물 아님", photoNote:"가상 프로토타입(3D 렌더링)"}
+  ];
+  // 형상 일러스트(사진이 없을 때). 고정 문자열만 사용.
+  const SH = {
+    planing:'<path class="sea" d="M0 84H240V120H0z"/><path class="hull" d="M18 82 L196 82 L226 66 L70 62 Q36 64 18 82Z"/><rect class="dk" x="92" y="52" width="38" height="11" rx="3"/><path class="hull" d="M111 52V36"/><circle class="hl" cx="111" cy="34" r="3"/>',
+    mother:'<path class="sea" d="M0 86H240V120H0z"/><path class="hull" d="M10 84 L206 84 L232 64 L40 60 Q16 64 10 84Z"/><rect class="dk" x="60" y="46" width="30" height="15" rx="2"/><rect class="dk" x="96" y="46" width="30" height="15" rx="2"/><rect class="dk" x="132" y="46" width="30" height="15" rx="2"/><path class="hull" d="M182 60V30"/><path class="hl" d="M172 30h20l-10-8z"/>',
+    sail:'<path class="sea" d="M0 86H240V120H0z"/><path class="hull" d="M40 84 L186 84 L206 72 L56 70 Q44 72 40 84Z"/><path class="hull" d="M112 70 L120 12 L136 12 L132 70Z"/><path class="hl" d="M120 12h16v6h-16z"/>',
+    rescue:'<path class="sea" d="M0 80H240V120H0z"/><path class="hull" d="M60 80 Q60 58 92 58 H170 Q190 58 196 80Z"/><path class="hl" d="M84 66h96v6H84z"/><path class="hull" d="M100 58V24"/><path class="hl" d="M100 24h24l-6 7 6 7h-24z"/>',
+    obs:'<path class="sea" d="M0 86H240V120H0z"/><path class="hull" d="M14 84 L200 84 L228 66 L52 62 Q22 64 14 84Z"/><rect class="dk" x="70" y="50" width="56" height="12" rx="2"/><path class="hull" d="M150 62V22"/><circle class="hull" cx="150" cy="20" r="7"/><path class="hull" d="M140 36h20M144 44h12"/>',
+    auv:'<path class="sea" d="M0 24H240V120H0z"/><path class="hull" d="M30 72 Q30 58 56 58 H186 Q212 58 216 72 Q212 86 186 86 H56 Q30 86 30 72Z"/><path class="hull" d="M30 72 L14 60 V84Z"/><path class="hl" d="M186 60h10v24h-10z"/>',
+    delta:'<path class="hull" d="M200 60 L60 18 L84 60 L60 102Z"/><path class="hull" d="M200 60 H44"/><circle class="hl" cx="44" cy="60" r="6"/><path class="hull" d="M66 22 l-10 -10 M66 98 l-10 10"/>'
+  };
+  const SHMAP = {"magura-mv11":"mother","saildrone-explorer":"sail","emily":"rescue","shahed-136":"delta"};
+  const shapeOf = r => r.shape || (r.ours ? ({A:"rescue",B:"obs",C:"planing",D:"planing"})[r.compare] : SHMAP[r.id]) || (r.domain === "수중" ? "auv" : r.domain === "공중" ? "delta" : "planing");
+  function fig(r){
+    const f = el("div", {class:"pfig"}); const u = r.photo && /^(https?:\/\/|\/|img\/)/.test(r.photo) ? r.photo : null;
+    if (u) {
+      const img = el("img", {src:u, alt:(r.photoNote || r.name) + " 사진", loading:"lazy", decoding:"async", referrerpolicy:"no-referrer"});
+      img.addEventListener("error", () => { f.replaceChildren(); const box = el("div", {style:"width:100%;display:grid;place-items:center"}); box.innerHTML = '<svg viewBox="0 0 240 120" role="img" aria-label="형상 일러스트">' + SH[shapeOf(r)] + '</svg>'; f.append(box, el("span", {class:"cr"}, "형상 일러스트(사진을 불러오지 못함)")); });
+      f.append(img);
+      if (r.photoNote) f.append(el("span", {class:"sim-badge", title:"이 제품의 자유 이용 사진이 없어 비슷한 기종 사진으로 대신했습니다."}, r.photoNote));
+      const src = safe(r.photoSource);
+      if (r.photoCredit) f.append(src ? el("a", {class:"cr", href:src, target:"_blank", rel:"noopener", title:"사진 출처·라이선스"}, r.photoCredit) : el("span", {class:"cr"}, r.photoCredit));
+    }
+    else { const box = el("div", {style:"width:100%;display:grid;place-items:center"}); box.innerHTML = '<svg viewBox="0 0 240 120" role="img" aria-label="' + (r.domain||"") + ' 형상 일러스트">' + SH[shapeOf(r)] + '</svg>'; f.append(box, el("span", {class:"cr"}, "형상 일러스트")); }
+    return f;
+  }
+  let assets = null, dbRef = null, view = "card";
+  async function upload(r, file){
+    if (!assets || !dbRef || !file) return;
+    try { const a = await assets.upload(file); await dbRef.doc("products/" + r.id).update({ photo: a.url, photoId: a.id, photoCredit: "직접 업로드", photoSource: "", photoNote: "" }); }
+    catch (e) { console.warn("사진 업로드 실패", e && e.code); }
+  }
+  function pcard(r){
+    const c = el("article", {class:"pcard" + (r.ours ? " ours" : "")}); c.append(fig(r));
+    const b = el("div", {class:"pbody"}), h = el("div", {class:"row"});
+    h.append(el("span", {class:"pill " + (r.ours ? "st-soon" : "st-ref")}, r.ours ? "당사" : (r.domain || "")), el("span", {class:"pill"}, r.role || ""));
+    if (r.compare && !r.ours) h.append(el("span", {class:"pill"}, "비교 " + r.compare));
+    b.append(h, el("div", {class:"t"}, r.name), el("div", {class:"cap"}, [r.maker, r.country].filter(Boolean).join(" · ")));
+    const dl = el("dl", {class:"spec"}); [["길이","length"],["속도","speed"],["항속","range"],["탑재","payload"],["단가","cost"],["현황","status"]].forEach(([k, f]) => { if (r[f]) { dl.append(el("dt", null, k), el("dd", null, r[f])); } }); b.append(dl);
+    if (r.note) b.append(el("div", {class:"m", style:"font-size:13px"}, r.note));
+    if (!r.ours) {
+      const act = el("div", {class:"row"}); const u = safe(r.url); if (u) act.append(el("a", {href:u, target:"_blank", rel:"noopener", class:"btn"}, "출처 ↗"));
+      act.append(el("a", {href:"https://commons.wikimedia.org/w/index.php?search=" + encodeURIComponent(r.name.replace(/\(.*\)/, "").trim()) + "&title=Special:MediaSearch&type=image", target:"_blank", rel:"noopener", class:"btn"}, "사진 찾기 ↗"));
+      if (assets && dbRef) { const lab = el("label", {class:"btn"}, r.photo ? "사진 바꾸기" : "사진 올리기"); const inp = el("input", {type:"file", accept:"image/*", style:"display:none"}); inp.addEventListener("change", () => upload(r, inp.files[0])); lab.append(inp); act.append(lab); }
+      b.append(act);
+    }
+    c.append(b); return c;
+  }
+  function setView(v){ view = v; $("#v-card").setAttribute("aria-pressed", String(v === "card")); $("#v-table").setAttribute("aria-pressed", String(v === "table")); $("#b-cards").hidden = $("#b-cardnote").hidden = v !== "card"; $("#b-tablebox").hidden = $("#b-tnote").hidden = v !== "table"; }
+  $("#v-card").addEventListener("click", () => setView("card")); $("#v-table").addEventListener("click", () => setView("table"));
+  function renderBench(){
+    const m = $("#b-model").value, dom = $("#b-dom").value, q = $("#b-q").value.trim().toLowerCase();
+    const ok = r => (m === "all" || String(r.compare || "").includes(m)) && (dom === "all" || r.domain === dom) && (!q || [r.name, r.maker, r.country].join(" ").toLowerCase().includes(q));
+    const list = OURS.map(r => ({...r, ours:true})).concat(prods.slice().sort((a, b) => (a.order ?? 99) - (b.order ?? 99))).filter(ok);
+    const cards = $("#b-cards"); cards.replaceChildren(); list.forEach(r => cards.append(pcard(r)));
+    if (!list.length) cards.append(el("div", {class:"empty"}, "조건에 맞는 제품이 없습니다."));
+    const hp = $("#home-prod"); hp.replaceChildren();
+    const top = prods.slice().sort((a, b) => String(b.updated||"").localeCompare(String(a.updated||"")) || (a.order ?? 99) - (b.order ?? 99)).filter(p => p.domain === "수상").slice(0, 3);
+    if (!top.length) hp.append(el("div", {class:"empty"}, "서버에 연결된 상태에서 열어야 보입니다."));
+    top.forEach(p => {
+      const ph = safe(p.photo), c = el("article", {class:"card" + (ph ? " media" : "")});
+      if (ph) c.append(el("img", {src:ph, alt:(p.photoNote || p.name) + " 사진", loading:"lazy", referrerpolicy:"no-referrer", title:p.photoCredit || ""}));
+      c.append(el("div", {class:"t"}, p.name), el("div", {class:"m"}, [p.maker, p.length, p.speed].filter(Boolean).join(" · ")), el("div", {class:"m"}, p.note || ""));
+      hp.append(c);
+    });
+    const body = $("#b-body"); body.replaceChildren();
+    if (!list.length) { const tr = el("tr"); tr.append(el("td", {colspan:"11", class:"cap"}, "조건에 맞는 제품이 없습니다.")); body.append(tr); return; }
+    for (const r of list) {
+      const tr = el("tr", r.ours ? {style:"background:var(--accent-soft)"} : null);
+      tr.append(el("td", null, r.domain || ""));
+      const n = el("td"); const u = safe(r.url); if (u) n.append(el("a", {href:u, target:"_blank", rel:"noopener"}, r.name)); else n.append(el("b", null, r.name)); tr.append(n);
+      ["maker","role","length","speed","range","payload","cost","status"].forEach(k => tr.append(el("td", null, k === "maker" ? [r.maker, r.country].filter(Boolean).join(" · ") : (r[k] || ""))));
+      tr.append(el("td", null, (r.compare && !r.ours ? "[" + r.compare + "] " : "") + (r.note || "")));
+      body.append(tr);
+    }
+  }
+  ["#b-model","#b-dom","#b-q"].forEach(s => $(s).addEventListener("input", renderBench));
+
+  function renderWar(){
+    const hw = $("#home-war"); hw.replaceChildren();
+    const recent = news.filter(n => n.type === "기사" && n.date).sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 3);
+    if (!recent.length) hw.append(el("div", {class:"empty"}, news.length ? "최근 기사가 없습니다." : "서버에 연결된 상태에서 열어야 보입니다."));
+    recent.forEach(n => { const c = el("article", {class:"card"}), h = el("div", {class:"row"}); h.append(el("span", {class:"pill"}, n.theater || ""), el("span", {class:"cap"}, n.date + " · " + (n.source || ""))); const u = safe(n.url); const t = el("div", {class:"t"}); if (u) t.append(el("a", {href:u, target:"_blank", rel:"noopener", style:"color:inherit"}, n.title + " ↗")); else t.textContent = n.title; c.append(h, t); hw.append(c); });
+    const box = $("#w-sum"); box.replaceChildren();
+    const ups = [];
+    ["ua","ir"].forEach(k => { const w = war[k]; if (!w) return; ups.push(w.updated || "");
+      const p = el("div", {class:"panel"}); p.append(el("h2", null, w.title || k), el("p", null, w.summary || ""));
+      if (Array.isArray(w.lessons) && w.lessons.length) { p.append(el("h3", null, "당사 설계 시사점")); const ul = el("ul", {class:"check"}); w.lessons.forEach(x => ul.append(el("li", null, x))); p.append(ul); }
+      box.append(p); });
+    $("#w-updated").textContent = ups.length ? "요약 갱신 " + ups.sort().pop() + " · 기사·동영상 " + news.length + "건" : "서버에 연결된 상태에서 열어야 전황이 보입니다.";
+    const th = $("#w-th").value, dom = $("#w-dom").value, ty = $("#w-type").value;
+    const list = news.filter(n => (th === "all" || n.theater === th) && (dom === "all" || n.domain === dom) && (ty === "all" || n.type === ty))
+      .sort((a, b) => String(b.date || b.added || "").localeCompare(String(a.date || a.added || "")));
+    const lb = $("#w-list"); lb.replaceChildren();
+    if (!list.length) { lb.append(el("div", {class:"empty"}, news.length ? "조건에 맞는 항목이 없습니다." : "아직 수집된 기사가 없습니다.")); return; }
+    for (const n of list) {
+      const c = el("article", {class:"card"}), h = el("div", {class:"row"});
+      h.append(el("span", {class:"pill " + (n.type === "동영상" ? "st-soon" : "st-ref")}, n.type === "동영상" ? "▶ 동영상" : "기사"), el("span", {class:"pill"}, n.theater || ""), el("span", {class:"pill"}, n.domain || ""), el("span", {class:"cap"}, [n.date || "날짜 미상", n.source].filter(Boolean).join(" · ")));
+      c.append(h);
+      const u = safe(n.url); const t = el("div", {class:"t"}); if (u) t.append(el("a", {href:u, target:"_blank", rel:"noopener", style:"color:inherit"}, n.title + " ↗")); else t.textContent = n.title; c.append(t);
+      if (n.summary) c.append(el("div", {class:"m"}, n.summary));
+      if (n.lesson) c.append(el("div", null, "시사점: " + n.lesson));
+      lb.append(c);
+    }
+  }
+  ["#w-th","#w-dom","#w-type"].forEach(s => $(s).addEventListener("input", renderWar));
+
+  const SITES = [
+    ["수상드론", [["Naval News — 해상 무인체 뉴스","https://www.navalnews.com/"],["H I Sutton Covert Shores — 수상·수중 무인체 분석","https://www.hisutton.com/"],["Unmanned Systems Technology","https://www.unmannedsystemstechnology.com/"],["Saildrone","https://www.saildrone.com/"],["Saronic","https://www.saronic.com/"],["MARTAC","https://martacsystems.com/"]]],
+    ["공중드론", [["The War Zone — 드론·무기체계 분석","https://www.twz.com/"],["Defense News","https://www.defensenews.com/"],["DroneXL — 드론 산업 뉴스","https://dronexl.co/"],["Oryx — 장비 손실 시각 검증","https://www.oryxspioenkop.com/"],["드론 원스톱 민원서비스(국토부)","https://drone.onestop.go.kr/"]]],
+    ["수중드론", [["H I Sutton — AUV·잠수정","https://www.hisutton.com/"],["Anduril (Dive-LD·Dive-XL)","https://www.anduril.com/"],["Ocean News & Technology","https://www.oceannews.com/"]]],
+    ["전황", [["ISW — 우크라이나 전황 평가","https://www.understandingwar.org/"],["CTP-ISW Iran Update","https://www.criticalthreats.org/"],["GlobalSecurity — 일일 상황","https://www.globalsecurity.org/"],["Kyiv Independent","https://kyivindependent.com/"],["Militarnyi — 우크라이나 군사 뉴스","https://militarnyi.com/en/"],["미 중부사령부(CENTCOM)","https://www.centcom.mil/"]]],
+    ["국내 기관·과제", [["방위사업청","https://www.dapa.go.kr/"],["국방과학연구소","https://www.add.re.kr/"],["국방기술진흥연구소","https://www.krit.re.kr/"],["국방기술품질원","https://www.dtaq.re.kr/"],["NTIS 국가R&D 공고","https://www.ntis.go.kr/"],["국방일보","https://kookbang.dema.mil.kr/"],["한국해양과학기술원(KIOST)","https://www.kiost.ac.kr/"],["해양경찰청","https://www.kcg.go.kr/"]]]
+  ];
+  (function(){ const box = $("#s-list"); SITES.forEach(([g, ls]) => { const p = el("div", {class:"panel"}); p.append(el("h2", null, g)); const d = el("div", {class:"links"}); ls.forEach(([n, u]) => d.append(el("a", {href:u, target:"_blank", rel:"noopener"}, n + " ↗"))); p.append(d); box.append(p); }); })();
+
+  let laws = [];
+  function renderLaws(){
+    const m = $("#l-model").value, box = $("#l-list"); box.replaceChildren();
+    const list = laws.filter(l => m === "all" || String(l.applies || "").includes(m)).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    if (!list.length) { box.append(el("div", {class:"empty"}, laws.length ? "조건에 맞는 항목이 없습니다." : "서버에 연결된 상태에서 열어야 법규 목록이 보입니다.")); return; }
+    const groups = []; list.forEach(l => { let g = groups.find(x => x[0] === l.cat); if (!g) { g = [l.cat, []]; groups.push(g); } g[1].push(l); });
+    groups.forEach(([cat, ls]) => {
+      const p = el("div", {class:"panel"}); p.append(el("h2", null, cat));
+      ls.forEach(l => { const c = el("article", {class:"lawcard"}), h = el("div", {class:"row"});
+        const u = safe(l.url); const t = el("b"); if (u) t.append(el("a", {href:u, target:"_blank", rel:"noopener", style:"color:inherit"}, l.name + " ↗")); else t.textContent = l.name;
+        h.append(t); String(l.applies || "").split("·").filter(Boolean).forEach(x => h.append(el("span", {class:"pill"}, "모델 " + x.trim()))); if (l.status) h.append(el("span", {class:"cap"}, l.status));
+        c.append(h, el("div", {class:"m", style:"font-size:13.5px"}, l.what || ""), el("div", {style:"font-size:13.5px"}, "당사 조치: " + (l.action || ""))); p.append(c); });
+      box.append(p);
+    });
+  }
+  $("#l-model").addEventListener("input", renderLaws);
+  renderBench(); renderWar(); renderLaws();
+  (async () => {
+    const db = window.claude ? await window.claude.use("db") : null; if (!db) { renderWar(); return; }
+    dbRef = db; window.claude.use("assets").then(a => { assets = a; renderBench(); }, () => {});
+    db.collection("laws").onSnapshot(s => { laws = s.docs.map(d => ({ id: d.id, ...(d.data() || {}) })); renderLaws(); }, () => {});
+    db.collection("products").onSnapshot(s => { prods = s.docs.map(d => ({ id: d.id, ...(d.data() || {}) })); renderBench(); }, () => {});
+    db.collection("news").onSnapshot(s => { news = s.docs.map(d => ({ id: d.id, ...(d.data() || {}) })); renderWar(); }, () => {});
+    db.collection("war").onSnapshot(s => { war = {}; s.docs.forEach(d => { war[d.id] = d.data() || {}; }); renderWar(); }, () => {});
+  })();
+})();
+</script>
+
+<script>
+/* 운용 시뮬레이터(검증 리허설): public/sim/ 의 지상통제소 시뮬레이터와 시험 기록(simruns) */
+(function(){
+  const $ = s => document.querySelector(s);
+  const el = (t, a, x) => { const e = document.createElement(t); if (a) for (const k in a) e.setAttribute(k, a[k]); if (x != null) e.textContent = x; return e; };
+  // 시뮬레이터 js/scenarios.js 의 SC 와 id 를 맞춘다
+  const SC = [
+    { id:"failover", title:"링크 자동 전환", stage:"통합 시험", reqs:["COM-03"], crit:"차단 후 2초 이내 예비 링크로 자동 전환" },
+    { id:"failsafe", title:"통신 두절 안전 동작", stage:"통합 시험", reqs:["COM-04"], crit:"두절 후 설정 시간+1초 이내 지정점 복귀" },
+    { id:"health", title:"상태감시·경보", stage:"모듈 시험", reqs:["COM-05","COM-07"], crit:"고장 주입 후 1초 이내 위험 경보" },
+    { id:"multi", title:"1인 다척 운용", stage:"통합 시험", reqs:["COM-09"], crit:"3척 동시 자율 운항 3분 연속 유지" },
+    { id:"bit", title:"장기 보관 후 점검", stage:"모듈 시험", reqs:["C 보관·전개"], crit:"자체 점검(BIT) 전 항목 정상" },
+    { id:"rescue", title:"인명구조 임무", stage:"실해역 시험 리허설", reqs:["A 탐색","A 구조"], crit:"구조부이를 요구조자 40m 이내에 전달" },
+    { id:"oil", title:"유출유 감시 순항", stage:"실해역 시험 리허설", reqs:["B 자율 순항","B 관측 센서","IF-10"], crit:"순항 중 유출유 감지·상황실 경보" },
+    { id:"colav", title:"AIS 충돌 회피", stage:"통합 시험", reqs:["B 자율 순항"], crit:"최근접 거리 150m 이상" },
+    { id:"intrusion", title:"경계구역 침입 대응", stage:"실해역 시험 리허설", reqs:["D 탐지·식별","D 경계구역","D 비살상 대응","IF-10"], crit:"진입 1분 전 탐지 + 즉시 상황실 보고 + 경고 후 이탈" },
+    { id:"seactrl", title:"해상통제소 인계(외해 운용)", stage:"통합 시험", reqs:["COM-03","COM-04","해상통제소"], crit:"통제권 자동 인계 + 두절 0초 + 외해 지점 도달" },
+  ];
+  const TRACE = [
+    ["COM-01","중국산 부품 배제","문서 검토",null,"대상 아님(BOM 원산지 감사)"],
+    ["COM-02","모듈형 구조","시연",null,"대상 아님(모듈 교체 실물 시연)"],
+    ["COM-03","통신 이중화","시험","failover"],
+    ["COM-04","통신 두절 시 안전 동작","시험","failsafe"],
+    ["COM-05","전장 함체 방수","시험","health","누수 감지·경보 경로만(방수 등급은 실물 시험)"],
+    ["COM-06","전장 함체 열·습도 관리","환경시험",null,"부분: 시뮬레이터 상태감시 탭에서 냉각 고장 주입으로 관찰"],
+    ["COM-07","상태감시","시험","health"],
+    ["COM-08","운항·상태 기록","시험",null,"모든 시나리오: 원격측정 CSV·이벤트 JSON 추출"],
+    ["COM-09","1인 운용","시연","multi"],
+    ["COM-10","사이버보안","문서·시험",null,"대상 아님(화면 표시만, 암호모듈은 문서·시험)"],
+    ["A 탐색·구조","열화상 탐색, 구조부이 원격 분리","실해역","rescue"],
+    ["B 자율 순항","경로점 자율 항해, AIS 충돌 회피","실해역","oil,colav"],
+    ["B 관측 센서","기상·수질·유출유 영상","실해역","oil"],
+    ["C 보관·전개","장기 보관 후 점검만으로 운용","시연","bit"],
+    ["D 탐지·경계구역","레이더·EO/IR·AIS 대조, 지오펜스 경보","실해역","intrusion"],
+    ["D 비살상 대응","경고 방송·탐조등(무장 없음)","시연","intrusion"],
+    ["해상통제소","외해에서 지원함 탑재 통제소로 통제권 인계","시험","seactrl"],
+    ["D 상시 경계","2척 교대 24시간 순찰, 1척 8시간(안)","실해역",null,"부분: 운항 탭 순찰 경로 반복·배터리 잔여 시간으로 관찰"],
+    ["IF-10","지상통제소 → 상황실","시험","oil,intrusion"],
+  ];
+  let runs = [], db = null, open = null;
+  const fmt = iso => { try { return new Date(iso).toLocaleString("ko-KR", { dateStyle:"short", timeStyle:"short" }); } catch { return iso || "-"; } };
+  const mmss = s => s == null ? "-" : `${Math.floor(s / 60)}분 ${Math.round(s % 60)}초`;
+  const latest = id => runs.filter(r => r.scenario === id).sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)))[0];
+  const pill = r => r ? el("span", { class: "pill " + (r.result === "합격" ? "res-pass" : r.result === "불합격" ? "res-fail" : "res-none") }, r.result) : el("span", { class: "pill res-none" }, "기록 없음");
+
+  function runHere(id, page){
+    const box = $("#sim-frame");
+    box.replaceChildren(el("iframe", { src: "sim/" + (page || "") + (id ? "?scenario=" + encodeURIComponent(id) : ""), title: page ? "부산 실해역 운용" : "지상통제소 운용 시뮬레이터" }));
+    $("#sim-close").hidden = false;
+    box.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  $("#sim-load").addEventListener("click", () => runHere(""));
+  $("#sim-close").addEventListener("click", () => { $("#sim-frame").replaceChildren(el("p", { class: "empty" }, "시뮬레이터를 닫았습니다.")); $("#sim-close").hidden = true; });
+
+  const BUSAN = [
+    ["인명구조", "rescue-gwangalli", "광안리 앞 익수자 구조", "A", "부이를 요구조자 40m 이내 전달"],
+    ["인명구조", "rescue-taejongdae", "태종대 갯바위 고립자 수색", "A", "배터리 30% 이상 남기고 부이 전달"],
+    ["해안감시", "coast-songdo", "송도·감천 해안 접근 선박 감시", "D", "해안 1km 도달 3분 전 탐지 + 보고 + 경고 후 이탈"],
+    ["어장감시", "fishery-gijang", "기장 앞바다 불법조업 감시", "B", "탐지·통보 + 증거 영상 2분"],
+    ["해양오염감시", "pollution-haeundae", "해운대 앞바다 유출유 감시", "B", "순항 중 유출유 감지·보고"],
+    ["해양오염감시", "pollution-gamcheon", "감천항 앞 선박 기름 배출 감시", "B", "유막 발생 15분 이내 감지·보고"],
+    ["국가중요시설 순찰", "facility-port", "부산항 북항 부두 보안구역 경계", "D", "진입 1분 전 탐지 + 즉시 보고 + 경고 후 이탈"],
+    ["국가중요시설 순찰", "facility-gori", "고리원전 앞 해역 경계", "D", "진입 2분 전 탐지 + 즉시 보고 + 경고 후 이탈"],
+    ["해상통제소", "mcs-offshore", "외해 관측 · 해상통제소 인계", "B", "자동 인계 + 두절 2초 미만 + 외해 도달"],
+    ["해상통제소", "mcs-nolink", "해상통제소 없이 외해 진출(두절 안전 동작)", "B", "두절 15초+1초 안에 안전 동작"],
+    ["1인 다척", "fleet", "광안리·해운대·북항 3척 동시 운용", "A·B·D", "3척 동시 자율 운항 5분"],
+  ];
+  function renderBusan(){
+    const box = $("#busan-list"); if (!box) return; box.replaceChildren();
+    const groups = []; BUSAN.forEach(r => { let g = groups.find(x => x[0] === r[0]); if (!g) { g = [r[0], []]; groups.push(g); } g[1].push(r); });
+    groups.forEach(([g, list]) => {
+      const wrap = el("div"); wrap.append(el("div", { class: "cap", style: "font-weight:700;margin-bottom:6px" }, g));
+      const grid = el("div", { class: "scgrid" });
+      list.forEach(([, id, title, model, crit]) => {
+        const c = el("article", { class: "sc" }), last = latest("busan-" + id);
+        const st = el("div", { class: "row" }); st.append(pill(last), el("span", { class: "cap" }, last ? fmt(last.savedAt) : ""));
+        const btns = el("div", { class: "row" });
+        const b = el("button", { type: "button", class: "btn" }, "여기서 실행"); b.addEventListener("click", () => runHere(id, "busan.html"));
+        btns.append(b, el("a", { class: "btn", href: "sim/busan.html?scenario=" + id, target: "_blank", rel: "noopener" }, "새 창 ↗"));
+        c.append(el("span", { class: "cap" }, "모델 " + model), el("div", { class: "t" }, title), el("p", { class: "cap" }, "합격 기준: " + crit), st, btns);
+        grid.append(c);
+      });
+      wrap.append(grid); box.append(wrap);
+    });
+  }
+  function renderCards(){
+    renderBusan();
+    const list = $("#sim-list"); list.replaceChildren();
+    SC.forEach(s => {
+      const c = el("article", { class: "sc" });
+      const chips = el("div", { class: "chips" }); s.reqs.forEach(r => chips.append(el("span", { class: "chip" }, r)));
+      const last = latest(s.id);
+      const st = el("div", { class: "row" }); st.append(pill(last), el("span", { class: "cap" }, last ? fmt(last.savedAt) : ""));
+      const btns = el("div", { class: "row" });
+      const a = el("a", { class: "btn", href: "sim/?scenario=" + s.id, target: "_blank", rel: "noopener" }, "새 창 ↗");
+      const b = el("button", { type: "button", class: "btn" }, "여기서 실행"); b.addEventListener("click", () => runHere(s.id));
+      btns.append(b, a);
+      c.append(el("span", { class: "cap" }, s.stage), el("div", { class: "t" }, s.title), chips, el("p", { class: "cap" }, "합격 기준: " + s.crit), st, btns);
+      list.append(c);
+    });
+  }
+  function renderTrace(){
+    const t = $("#t-simtrace"); const th = el("thead"), hr = el("tr");
+    ["ID","요구사항","PRD 검증","시나리오","최근 결과"].forEach(h => hr.append(el("th", null, h))); th.append(hr);
+    const tb = el("tbody");
+    TRACE.forEach(([id, name, how, sc, note]) => {
+      const tr = el("tr"); tr.append(el("td", { class: "id" }, id), el("td", null, name), el("td", null, how));
+      const tdS = el("td"), tdR = el("td");
+      if (sc) sc.split(",").forEach(x => { const s = SC.find(q => q.id === x); const b = el("button", { type: "button", class: "btn", style: "margin:0 4px 4px 0" }, s.title); b.addEventListener("click", () => runHere(x)); tdS.append(b); tdR.append(pill(latest(x)), " "); });
+      if (note) tdS.append(el("div", { class: "cap" }, note));
+      if (!sc) tdR.append(el("span", { class: "cap" }, "-"));
+      tr.append(tdS, tdR); tb.append(tr);
+    });
+    t.replaceChildren(th, tb);
+  }
+  function renderRuns(){
+    const tb = $("#sim-runs"); tb.replaceChildren();
+    const sorted = runs.slice().sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)));
+    if (!sorted.length) { const tr = el("tr"); tr.append(el("td", { colspan: "7", class: "cap" }, db ? "아직 저장된 시험 기록이 없습니다." : "서버에 연결된 상태에서 열어야 시험 기록이 보입니다.")); tb.append(tr); }
+    sorted.slice(0, 100).forEach(r => {
+      const tr = el("tr", { class: "run" });
+      const del = el("button", { type: "button", class: "btn" }, "삭제");
+      del.addEventListener("click", async e => { e.stopPropagation(); if (!confirm("이 시험 기록을 삭제할까요?")) return; try { await db.doc("simruns/" + r.id).delete(); } catch (err) { alert(err.message); } });
+      const tdRes = el("td"); tdRes.append(pill(r));
+      const tdDel = el("td"); if (db) tdDel.append(del);
+      tr.append(el("td", { class: "num" }, fmt(r.savedAt)), el("td", null, r.title || r.scenario), el("td", null, r.reqs || ""), tdRes, el("td", null, r.detail || ""), el("td", { class: "num" }, mmss(r.simTime)), tdDel);
+      tr.addEventListener("click", () => { open = open === r.id ? null : r.id; renderRuns(); });
+      tb.append(tr);
+      if (open === r.id) { const lr = el("tr", { class: "log" }); lr.append(el("td", { colspan: "7" }, (Array.isArray(r.log) && r.log.length ? r.log.join("\n") : "이벤트 기록 없음"))); tb.append(lr); }
+    });
+    const total = SC.length, done = SC.filter(s => latest(s.id)).length, passed = SC.filter(s => (latest(s.id) || {}).result === "합격").length;
+    const k = $("#sim-kpis"); k.replaceChildren();
+    [[String(total), "검증 시나리오"], [`${done}/${total}`, "시험한 시나리오"], [`${passed}/${total}`, "최근 결과 합격"], [String(runs.length), "저장된 시험 기록"]].forEach(([v, t]) => { const d = el("div", { class: "kpi" }); d.append(el("b", null, v), el("span", null, t)); k.append(d); });
+    const nb = $("#nav-sim"); const fails = SC.filter(s => (latest(s.id) || {}).result === "불합격").length;
+    nb.hidden = !fails; nb.textContent = fails;
+    $("#sim-runs-st").textContent = db ? `${runs.length}건` : "";
+  }
+  const renderAll = () => { renderCards(); renderTrace(); renderRuns(); };
+  renderAll();
+  (async () => {
+    db = window.claude ? await window.claude.use("db") : null;
+    if (!db) { renderAll(); return; }
+    db.collection("simruns").onSnapshot(s => { runs = s.docs.map(d => ({ id: d.id, ...(d.data() || {}) })); renderAll(); }, () => { $("#sim-runs-st").textContent = "시험 기록을 불러오지 못했습니다."; });
+  })();
+})();
+</script>
+<script>
+/* 상단 메뉴(펼침 메뉴·모바일 메뉴)와 화면 테마 */
+(function(){
+  const nav = document.querySelector(".topnav"), tog = document.getElementById("menu-toggle");
+  const closeAll = except => nav.querySelectorAll(".ng.open").forEach(g => { if (g !== except) { g.classList.remove("open"); g.querySelector(".ng-btn").setAttribute("aria-expanded", "false"); } });
+  nav.querySelectorAll(".ng-btn").forEach(b => b.addEventListener("click", e => {
+    const g = b.parentElement, open = !g.classList.contains("open");
+    closeAll(g); g.classList.toggle("open", open); b.setAttribute("aria-expanded", String(open)); e.stopPropagation();
+  }));
+  tog.addEventListener("click", () => { const o = !nav.classList.contains("open"); nav.classList.toggle("open", o); tog.setAttribute("aria-expanded", String(o)); });
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-go]")) { closeAll(); nav.classList.remove("open"); tog.setAttribute("aria-expanded", "false"); return; }
+    if (!e.target.closest(".topnav")) closeAll();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") { closeAll(); nav.classList.remove("open"); } });
+
+  const root = document.documentElement, tt = document.getElementById("theme-toggle");
+  const names = { "": "자동", light: "밝게", dark: "어둡게" };
+  const apply = m => { if (m) root.setAttribute("data-theme", m); else root.removeAttribute("data-theme"); tt.title = "화면 테마: " + names[m]; };
+  let mode = ""; try { mode = localStorage.getItem("theme") || ""; } catch (e) {}
+  if (!(mode in names)) mode = "";
+  apply(mode);
+  tt.addEventListener("click", () => { mode = mode === "" ? "light" : mode === "light" ? "dark" : ""; apply(mode); try { localStorage.setItem("theme", mode); } catch (e) {} });
+})();
+</script>
+<script>
+/* 선체 설계·단가 도구(public/tools/usv_hull_designer_magura.html) */
+(function(){
+  const $ = s => document.querySelector(s);
+  const steps = [["①","기준 선형 MAGURA V5 3D 재현"],["②","치수 조정·간이 유체해석·판정"],["③","재질별 중량·단가"],["④","STL·선도·오프셋 출력"]];
+  steps.forEach(([n, t]) => { const d = document.createElement("div"); d.className = "kpi"; const b = document.createElement("b"); b.textContent = n; const s = document.createElement("span"); s.textContent = t; d.append(b, s); $("#design-steps").append(d); });
+  $("#design-load").addEventListener("click", () => {
+    const f = document.createElement("iframe"); f.src = "tools/usv_hull_designer_magura.html"; f.title = "선체 설계·단가 시뮬레이터";
+    f.style.cssText = "display:block;width:100%;height:min(86vh,900px);border:1px solid var(--line);border-radius:8px;background:#fff";
+    $("#design-frame").replaceChildren(f);
+  });
+})();
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</body></html>

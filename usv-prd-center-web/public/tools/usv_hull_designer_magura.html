@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><title>MAGURA V5 기반 해양관측 USV 선체 설계·단가 시뮬레이터</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:"Noto Sans KR",system-ui,sans-serif;margin:0;background:#f4f6f8;color:#222}
+header{background:#0b2545;color:#fff;padding:14px 22px}header h1{margin:0;font-size:19px}header small{opacity:.8}
+nav{display:flex;gap:4px;padding:8px 22px;background:#13315c}.tab{background:#1f4a86;color:#dbe7ff;border:0;padding:8px 14px;border-radius:6px 6px 0 0;cursor:pointer}.tab.on{background:#fff;color:#0b2545;font-weight:700}
+.pane{display:none;padding:18px 22px}.pane.on{display:block}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13px}th,td{border:1px solid #dde3ea;padding:5px 7px;vertical-align:top}th{background:#eef2f7}
+.grid{display:grid;grid-template-columns:300px 1fr 360px;gap:14px}.card{background:#fff;border:1px solid #dde3ea;border-radius:8px;padding:12px}
+label{display:block;font-size:12.5px;margin:6px 0}label input,label select{width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #bcc5d0;border-radius:4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#view,#view1{width:100%;height:440px;border-radius:8px;display:block}#curve{width:100%;background:#fff;border:1px solid #dde3ea;border-radius:8px}
+.imgbox{width:100%;height:170px;background:#eef1f4;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:4px;color:#889;font-size:11px}.imgbox img{max-width:100%;max-height:100%}
+button{cursor:pointer;background:#1f4a86;color:#fff;border:0;border-radius:5px;padding:6px 10px}button.pick{padding:3px 8px}button.big{width:100%;padding:10px;margin-top:6px;font-size:14px}button.alt{background:#27ae60}
+tr.sel td{background:#eaf4ff}.note{font-size:12px;color:#555;background:#fff8e1;border:1px solid #ffe08a;border-radius:6px;padding:8px 10px;margin:10px 0}
+.warn{color:#c0392b}#o_table td:first-child,#b_calc td:first-child,#b_spec td:first-child{color:#555;width:52%}.legend{height:12px;background:linear-gradient(90deg,#0000ff,#00ffff,#ffff00,#ff0000);border-radius:3px}
+.matedit input{width:70px}
+.vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}.vbox{border:1px solid #dde3ea;border-radius:8px;padding:10px;background:#fafbfc}.vt{font-weight:700;font-size:13px;margin-bottom:6px}
+.vbar{position:relative;height:16px;background:#e6ebf0;border-radius:8px;overflow:hidden}.vfill{height:100%;width:0;border-radius:8px;transition:width .3s}
+.vnum{font-size:20px;font-weight:700;margin:6px 0 2px}.vmsg{font-size:12px;color:#444;line-height:1.5}.g{background:#2ecc71}.y{background:#f1c40f}.r{background:#e74c3c}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;color:#fff;font-size:11px;margin-right:6px;vertical-align:middle}.badge.g{background:#27ae60}.badge.y{background:#d4a017}.badge.r{background:#c0392b}
+#v_hint li{margin:2px 0}#verdict input{padding:2px 4px;border:1px solid #bcc5d0;border-radius:4px}#v_base{font-size:12px;color:#334;margin-top:4px}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<header><a href="../#design" target="_top" style="float:right;color:#cfe3ff;font-size:13px;text-decoration:none;margin-top:3px">← 수상드론 what's next</a><h1>MAGURA V5 선형 기반 해양감시/기상관측용 소형 USV 선체 설계·단가 시뮬레이터</h1><small>1 기준 선형(MAGURA V5) 3D 재현 → 2 치수·중량 조정과 간이 유체해석·비전공자용 판정 → 3 재질별 중량/단가 → 4 3D 프린트용 STL·선도 출력 (브라우저 단독 실행)</small></header>
+<nav><button class="tab on" data-t="p1">① 기준 선형: MAGURA V5</button><button class="tab" data-t="p2">② 선체 조정·유체해석·판정</button><button class="tab" data-t="p3">③ 재질·단가 시뮬레이션</button><button class="tab" data-t="p4">④ 3D 프린트/도면 출력</button></nav>
+
+<section id="p1" class="pane on">
+<div class="grid" style="grid-template-columns:340px 1fr 380px">
+<div class="card"><b>MAGURA V5 공표 제원</b> <small>(DSEI 2023 제조사 리플릿·제조사 인터뷰 기준)</small>
+<table id="b_spec" style="margin-top:6px">
+<tr><td>전장 / 전폭</td><td>5.5 m / 1.5 m</td></tr><tr><td>흘수 / 수선상 높이</td><td>0.4 m / 0.5 m</td></tr><tr><td>총중량</td><td>1,000 kg 미만</td></tr><tr><td>탑재중량</td><td>320 kg (표준 250 kg)</td></tr><tr><td>순항 / 최고속력</td><td>22 kn / 42 kn</td></tr><tr><td>항속거리 / 시간</td><td>450 nm(800 km) / 최대 60 h</td></tr><tr><td>추진</td><td>워터제트(가솔린)</td></tr><tr><td>선체</td><td>저시인성 V형 탄소섬유 선체, 수선상 약 0.5 m</td></tr><tr><td>단가(보도)</td><td>약 US$273,000 (시스템)</td></tr></table>
+<div class="note">아래 3D 모델은 공표 치수(5.5×1.5 m, 흘수 0.4 m, 수선상 0.5 m)와 공개 사진의 외형(깊은 V형 바닥, 낮은 선측, 중앙부 완만한 릿지형 상부, 뾰족한 선수)을 파라메트릭으로 재현한 <b>근사 선형</b>입니다. 실제 선도는 비공개이므로 치수 외 형상은 추정치입니다.</div>
+<b>실물 사진</b><div class="imgbox" id="b_imgbox"></div><input id="b_imgurl" placeholder="사진 URL 붙여넣기 (브라우저에 저장)" style="width:100%;box-sizing:border-box;margin-top:4px;font-size:11px">
+<p style="font-size:12px"><a target="_blank" href="https://duckduckgo.com/?iax=images&ia=images&q=MAGURA+V5+unmanned+surface+vessel+hull">이미지 검색</a> · <a target="_blank" href="https://www.navalnews.com/event-news/dsei-2023/2023/09/ukraines-magura-v5-usv-on-the-stage-at-dsei-2023/">Naval News(DSEI 2023)</a> · <a target="_blank" href="https://en.wikipedia.org/wiki/MAGURA_V5">Wikipedia</a></p>
+</div>
+<div class="card"><b>기준 선형 3D 재현</b> <label style="display:inline;margin-left:10px"><input type="checkbox" id="b_showWL" checked style="width:auto"> 수선면(총중량 1,000 kg 기준) 표시</label>
+<canvas id="view1"></canvas>
+<p style="font-size:12px;color:#555">마우스 드래그 회전 · 휠 확대 · 우클릭 이동. 색상은 재질 무관 표시용입니다.</p></div>
+<div class="card"><b>해석 엔진 검증 (공표값과 비교)</b><table id="b_calc" style="margin-top:6px"></table>
+<div class="note">계산 흘수가 공표 0.4 m, 최고속력 소요출력이 소형 가솔린 워터제트(수백 hp급) 범위에 들어오면 2단계 해석 엔진이 이 선형에 대해 합리적으로 작동한다고 볼 수 있습니다.</div>
+<button id="b_use" class="big">이 선형 그대로 2단계로 가져가기 (5.5 m 원형)</button>
+<button id="b_obs" class="big alt">해양관측용 축소안으로 가져가기 (4.5 m · 전기추진 · ≤5 m 요구조건 충족)</button>
+</div></div>
+</section>
+
+<section id="p2" class="pane">
+<div class="card" id="verdict" style="margin-bottom:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><b>한눈에 보는 판정 (비전공자용)</b>
+<span style="font-size:12px">판정 기준 → <label style="display:inline">설치 모터 출력(W) <input id="v_pow" type="number" value="4000" style="width:80px"></label> <label style="display:inline">배터리(kWh) <input id="v_bat" type="number" step="0.1" value="10" style="width:70px"></label> <label style="display:inline">허용 최대 흘수(선체높이 대비 %) <input id="v_tmax" type="number" value="60" style="width:60px"></label></span></div>
+<div id="v_base"></div>
+<div class="vgrid">
+ <div class="vbox" id="vb_buoy"><div class="vt">① 물에 잘 뜨나요? (부력)</div><div class="vbar"><div class="vfill"></div></div><div class="vnum"></div><div class="vmsg"></div></div>
+ <div class="vbox" id="vb_pay"><div class="vt">② 얼마나 실을 수 있나요? (탑재중량)</div><div class="vbar"><div class="vfill"></div></div><div class="vnum"></div><div class="vmsg"></div></div>
+ <div class="vbox" id="vb_spd"><div class="vt">③ 원하는 속력이 나오나요? (속력·항속)</div><div class="vbar"><div class="vfill"></div></div><div class="vnum"></div><div class="vmsg"></div></div>
+ <div class="vbox" id="vb_stab"><div class="vt">④ 잘 안 뒤집히나요? (복원성)</div><div class="vbar"><div class="vfill"></div></div><div class="vnum"></div><div class="vmsg"></div></div>
+</div>
+<div id="v_hint" style="font-size:12.5px;margin-top:8px"></div>
+</div>
+<div class="grid">
+<div class="card"><b>시제품 사양 입력</b> <small>(기준: MAGURA V5)</small>
+<div class="row2"><label>전장 L (m)<input id="i_L" type="number" step="0.1" value="4.5"></label><label>전폭 B (m)<input id="i_B" type="number" step="0.05" value="1.25"></label></div>
+<div class="row2"><label>선측 높이(깊이) D (m)<input id="i_D" type="number" step="0.05" value="0.55"></label><label>상부 릿지 높이 (m)<input id="i_ridge" type="number" step="0.05" value="0.22"></label></div>
+<div class="row2"><label>선형<select id="i_hull"><option value="mono">단동(하드차인 V형)</option><option value="cat">쌍동(카타마란)</option></select></label><label>데드라이즈 β (°)<input id="i_dead" type="number" step="1" value="20"></label></div>
+<div class="row2"><label>쌍동 선체폭 비율<input id="i_demi" type="number" step="0.05" value="0.3"></label><label>빌지 라운딩(0~1)<input id="i_bilge" type="number" step="0.1" value="0.3"></label></div>
+<label>LCG 위치(LWL 비, 선미기준)<input id="i_lcg" type="number" step="0.01" value="0.40"></label>
+<hr><div class="row2"><label>장비·추진·배터리 중량 (kg)<input id="i_equip" type="number" value="150"></label><label>페이로드 (kg)<input id="i_pay" type="number" value="60"></label></div>
+<label>선체 구조 중량(③ 재질에서 자동): <span id="o_hullMass"></span></label>
+<label><input type="checkbox" id="i_manualW" style="width:auto"> 총중량 직접 입력 (kg) <input id="i_Wtot" type="number" value="400"></label>
+<hr><div class="row2"><label>설계속력 (kn)<input id="i_V" type="number" step="0.5" value="8"></label><label>추진효율 η<input id="i_eta" type="number" step="0.05" value="0.5"></label></div>
+<div class="row2"><label>항속시간 (h)<input id="i_end" type="number" value="24"></label><label>호텔부하 (W)<input id="i_hotel" type="number" value="25"></label></div>
+<div class="row2"><label>마스트/센서 전면적 (m²)<input id="i_mast" type="number" step="0.01" value="0.08"></label><label>KG/D 비<input id="i_kg" type="number" step="0.05" value="0.45"></label></div>
+<label><input type="checkbox" id="i_showWL" checked style="width:auto"> 수선면 표시</label>
+</div>
+<div class="card"><b>3D 선체 조감도</b> — 색상: 선체 표면 압력(정수압 + 길이방향 경험적 동압 분포), 최대 <span id="pmax"></span> <div class="legend"></div>
+<canvas id="view"></canvas>
+<canvas id="curve" width="900" height="260" style="margin-top:10px"></canvas>
+<div class="note">해석 방법: 단면 적분 정수역학(흘수·배수량·침수면적·LCB·KB·BM) → ITTC-57 마찰저항 × 형상계수(1+k) + 잉여저항 경험식(배수량/반활주) ↔ Savitsky(1964) 활주 평형(트림·젖은길이 반복해) 을 Fn∇ 1.0~1.8 구간에서 가중 혼합. CFD가 아닌 <b>개념설계 단계 준경험식</b>이며 ±15~20% 오차가 있을 수 있어 최종 설계 전 수조시험/CFD 검증이 필요합니다.</div>
+</div>
+<div class="card"><b>정수역학 · 저항 · 동력 결과 (전문가용 상세)</b><table id="o_table"></table></div>
+</div></section>
+
+<section id="p3" class="pane">
+<div class="grid" style="grid-template-columns:320px 1fr">
+<div class="card econ"><b>경제성 가정</b>
+<label>인건비 (원/h)<input id="e_rate" type="number" value="35000"></label><label>생산 수량(몰드·치공구 상각)<input id="e_units" type="number" value="1"></label><label>간접비·이윤 (%)<input id="e_over" type="number" value="25"></label><label>자재 손실률 (%)<input id="e_scrap" type="number" value="15"></label><label>도장·마감 (원/m²)<input id="e_finish" type="number" value="120000"></label>
+<p style="font-size:12px">외판 면적: <span id="o_area"></span></p>
+<div class="note">단가는 선체 구조물(외판+갑판/릿지+내부보강)만 포함. 추진기·배터리·전장·센서·통신은 ②의 "장비 중량"으로만 반영되며 별도 BOM 필요. 재료 단가·두께식은 아래 표에서 직접 수정 가능(초기값은 가정치).</div></div>
+<div class="card"><b>재질별 선체 중량 → 흘수/저항 재계산 → 단가</b>
+<table><thead><tr><th>재질 / 공법</th><th>외판 두께 mm</th><th>구조중량 kg</th><th>총중량 kg</th><th>흘수 m</th><th>R_T N / P_B W<br>(설계속력)</th><th>자재비</th><th>공수/인건비</th><th>몰드·치공구<br>(수량 상각)</th><th>도장·마감</th><th>선체 단가(간접비 포함)</th><th></th></tr></thead><tbody id="costBody"></tbody></table>
+<p style="margin-top:14px"><b>재료 물성·단가 편집</b> (밀도 kg/m³ · 단가 원/kg · 두께식 mm = t0 + t1×L · 내부구조 계수 · 공수 h/m² · 치공구 원)</p>
+<table class="matedit"><thead><tr><th>ID</th><th>밀도</th><th>단가</th><th>두께식</th><th>구조계수</th><th>공수</th><th>치공구</th></tr></thead><tbody id="matBody"></tbody></table>
+</div></div></section>
+
+<section id="p4" class="pane">
+<div class="grid" style="grid-template-columns:360px 1fr">
+<div class="card"><b>3D 프린트 설정</b>
+<label>출력 모드<select id="x_mode"><option value="auto">베드 크기에 자동 축척</option><option value="fixed">축척 지정 (1:N)</option><option value="full">실물 크기(1:1, 대형 FGF 프린터·분할)</option></select></label>
+<label>프린터 베드 한 변 (mm)<input id="x_bed" type="number" value="250"></label>
+<label>축척 N (1:N)<input id="x_scale" type="number" value="10"></label>
+<label>길이방향 분할 수<input id="x_seg" type="number" value="1" min="1"></label>
+<label><input type="checkbox" id="x_hollow" checked style="width:auto"> 중공 쉘로 출력(내부 오프셋면 생성)</label>
+<label>쉘 벽두께 (모형 기준 mm)<input id="x_wall" type="number" value="2.5" step="0.5"></label>
+<p id="x_info" style="font-size:12.5px"></p>
+<div style="display:flex;flex-wrap:wrap;gap:6px"><button id="x_stl">STL 내보내기 (바이너리, mm)</button><button id="x_svg">선도(Lines Plan) SVG</button><button id="x_csv">오프셋 테이블 CSV</button><button id="x_json">사양서 JSON</button><button id="x_png">3D 렌더 PNG</button></div>
+</div>
+<div class="card"><b>출력물 안내</b>
+<ul style="font-size:13px;line-height:1.7">
+<li><b>STL</b>: Z-up, 단위 mm, 선체 외판+상부 릿지+선미/선수 캡으로 닫힌 솔리드. 중공 옵션 시 내부 오프셋면이 추가되어 지정 벽두께의 쉘이 됩니다. 분할 출력 시 세그먼트별 파일이 생성됩니다.</li>
+<li><b>선도 SVG</b>: 측면도(킬·차인·갑판·릿지·수선), 정면도(선미/선수 단면), 평면도(갑판·차인·수선 반폭).</li>
+<li><b>오프셋 테이블 CSV</b>: 10개 스테이션의 킬 높이·차인 좌표·갑판 반폭·릿지 높이·수선 반폭.</li>
+<li><b>사양서 JSON</b>: 입력 파라미터·정수역학·저항·단가 결과 전체.</li>
+<li>권장 출력: PETG/ASA, 레이어 0.2 mm, 벽 3~4 line, 수밀 시험용은 내부 에폭시 코팅.</li>
+</ul></div></div></section>
+
+<script>
+const USV = (function(){
+const g=9.80665, RHO=1025, NU=1.19e-6, RHO_AIR=1.225;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t);};
+// ---- Stage 1: single reference = MAGURA V5 (published figures) ----
+const BASELINE={name:'MAGURA V5',maker:'Ukraine (HUR / STE, now UFORCE)',L:5.5,B:1.5,draft:0.4,hAboveWL:0.5,mass:1000,payload:320,cruise:22,burst:42,range_nm:450,endurance_h:60,prop:'워터제트(가솔린)',hullNote:'저시인성 V형 탄소섬유 선체, 수선상 높이 약 0.5 m',cost_usd:273000,
+  params:{L:5.5,B:1.5,D:0.65,ridge:0.30,deadrise:22,hullType:'mono',demiFrac:0.3,bilge:0.2,nSt:41},equip:520,payload_kg:320,speed:22,lcg:0.38,mat:'CFRP'};
+const OBS_VARIANT={params:{L:4.5,B:1.25,D:0.55,ridge:0.22,deadrise:20,hullType:'mono',demiFrac:0.3,bilge:0.3,nSt:41},equip:150,payload_kg:60,speed:8,lcg:0.40,mat:'GFRP'};
+// ---- geometry ----
+function ridgeProfile(s,ridge){ if(!(ridge>0)) return 0; const bump=Math.exp(-Math.pow((s-0.42)/0.30,2)); return ridge*bump*smooth((s-0.03)/0.12)*smooth((0.97-s)/0.12); }
+function halfSection(s,hb,D,beta0,bilge,ridge){
+  let fd = s<0.55 ? 0.88+0.12*(s/0.55) : Math.sqrt(Math.max(0,1-Math.pow((s-0.55)/0.45,2)));
+  fd=Math.max(fd,0.03); const yd=hb*fd;
+  const beta=beta0+(58-beta0)*smooth((s-0.45)/0.55);
+  const yc=yd*(0.90-0.15*smooth((s-0.6)/0.4));
+  const zk=D*0.5*Math.pow(Math.max(0,(s-0.42)/0.58),2.0);
+  const zc=Math.min(zk+yc*Math.tan(beta*Math.PI/180),D*0.8);
+  const bm=[yc*0.55, zk+(zc-zk)*0.55 - bilge*(zc-zk)*0.18];
+  const tm=[yc+(yd-yc)*0.45, zc+(D-zc)*0.5];
+  const r=ridgeProfile(s,ridge); const zt=D+r;
+  return {yd,yc,zk,zc,zt,pts:[[0,zk],bm,[yc,zc],tm,[yd,D]],top:[[yd*0.6,D+r*0.4],[yd*0.22,D+r*0.92],[0,zt]]};
+}
+// closed polygon: centre-top -> port top -> port deck edge -> port side -> keel -> stbd side -> stbd deck edge -> stbd top
+function fullSection(h){
+  const out=[[0,h.top[2][1]]];
+  out.push([-h.top[1][0],h.top[1][1]],[-h.top[0][0],h.top[0][1]]);
+  for(let i=h.pts.length-1;i>=1;i--) out.push([-h.pts[i][0],h.pts[i][1]]);
+  for(let i=0;i<h.pts.length;i++) out.push([h.pts[i][0],h.pts[i][1]]);
+  out.push([h.top[0][0],h.top[0][1]],[h.top[1][0],h.top[1][1]]);
+  return out;
+}
+function buildHulls(p,s0=0,s1=1){
+  const n=p.nSt||41, hulls=[];
+  const defs = p.hullType==='cat' ? [{yOff:-(p.B/2-p.B*p.demiFrac/2),hb:p.B*p.demiFrac/2},{yOff:(p.B/2-p.B*p.demiFrac/2),hb:p.B*p.demiFrac/2}] : [{yOff:0,hb:p.B/2}];
+  for(const d of defs){const secs=[];
+    for(let i=0;i<n;i++){const s=s0+(s1-s0)*i/(n-1);const h=halfSection(s,d.hb,p.D,p.deadrise,p.bilge||0,p.ridge||0);secs.push({s,x:s*p.L,h,poly:fullSection(h).map(q=>[q[0]+d.yOff,q[1]])});}
+    hulls.push({yOff:d.yOff,hb:d.hb,secs});}
+  return hulls;
+}
+function clipBelow(poly,T){const out=[];const n=poly.length;for(let i=0;i<n;i++){const a=poly[i],b=poly[(i+1)%n];const ina=a[1]<=T,inb=b[1]<=T;if(ina)out.push(a);if(ina!==inb){const t=(T-a[1])/(b[1]-a[1]);out.push([a[0]+(b[0]-a[0])*t,T]);}}return out;}
+function sectionProps(poly,T){
+  const c=clipBelow(poly,T); if(c.length<3) return {A:0,G:0,Bwl:0,zc:0};
+  let A=0,G=0,Bwl=0,Mz=0;
+  for(let i=0;i<c.length;i++){const a=c[i],b=c[(i+1)%c.length];A+=a[0]*b[1]-b[0]*a[1];Mz+=(a[1]+b[1])*(a[0]*b[1]-b[0]*a[1]);const len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(Math.abs(a[1]-T)<1e-9&&Math.abs(b[1]-T)<1e-9)Bwl+=len;else G+=len;}
+  A=Math.abs(A)/2; const zc=A>0?Math.abs(Mz)/(6*A):0; return {A,G,Bwl,zc};
+}
+function hydro(hulls,T,L){
+  let vol=0,S=0,Awp=0,Mx=0,Mz=0,xmin=Infinity,xmax=-Infinity,Bmax=0,Amax=0,Iwp=0;
+  for(const h of hulls){const sp=h.secs.map(sec=>sectionProps(sec.poly,T));
+    for(let i=0;i<h.secs.length-1;i++){const dx=h.secs[i+1].x-h.secs[i].x,a=sp[i],b=sp[i+1];
+      vol+=0.5*(a.A+b.A)*dx;S+=0.5*(a.G+b.G)*dx;Awp+=0.5*(a.Bwl+b.Bwl)*dx;Mx+=0.5*(a.A*h.secs[i].x+b.A*h.secs[i+1].x)*dx;Mz+=0.5*(a.A*a.zc+b.A*b.zc)*dx;
+      const ya=h.yOff;Iwp+=0.5*((a.Bwl**3)/12+a.Bwl*ya*ya+(b.Bwl**3)/12+b.Bwl*ya*ya)*dx;}
+    sp.forEach((q,i)=>{if(q.A>1e-7){xmin=Math.min(xmin,h.secs[i].x);xmax=Math.max(xmax,h.secs[i].x);}Bmax=Math.max(Bmax,q.Bwl);Amax=Math.max(Amax,q.A);});}
+  const LWL=isFinite(xmin)?xmax-xmin:0;
+  return {T,vol,S:S*1.02,Awp,LCB:vol>0?Mx/vol:0,KB:vol>0?Mz/vol:0,LWL,Bwl:Bmax,Amax,Iwp,BM:vol>0?Iwp/vol:0,CB:(LWL>0&&Bmax>0&&T>0)?vol/(LWL*Bmax*T*hulls.length):0,CP:(Amax>0&&LWL>0)?vol/(Amax*LWL):0};
+}
+function solveDraft(hulls,W,L,D){const target=W/RHO;let lo=0,hi=D;if(hydro(hulls,hi,L).vol<target)return {ok:false,...hydro(hulls,hi,L)};for(let k=0;k<50;k++){const m=(lo+hi)/2;if(hydro(hulls,m,L).vol<target)lo=m;else hi=m;}return {ok:true,...hydro(hulls,(lo+hi)/2,L)};}
+function cf_ittc(Re){return 0.075/Math.pow(Math.log10(Math.max(Re,1e4))-2,2);}
+function savitsky(W,V,b,beta,LWL,lcgFrac){
+  const CV=V/Math.sqrt(g*b), CLb=W/(0.5*RHO*V*V*b*b);
+  let CL0=CLb; for(let i=0;i<60;i++) CL0=CLb+0.0065*beta*Math.pow(CL0,0.6);
+  const lamOf=tau=>{let lo=0.05,hi=12;const f=l=>Math.pow(tau,1.1)*(0.012*Math.sqrt(l)+0.0055*Math.pow(l,2.5)/(CV*CV))-CL0;if(f(hi)<0)return hi;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(f(m)<0)lo=m;else hi=m;}return (lo+hi)/2;};
+  const LCG=lcgFrac*LWL; const lpOf=tau=>{const l=lamOf(tau);return l*b*(0.75-1/(5.21*CV*CV/(l*l)+2.39));};
+  let lo=0.5,hi=15; for(let i=0;i<60;i++){const m=(lo+hi)/2;if(lpOf(m)>LCG)lo=m;else hi=m;}
+  const tau=(lo+hi)/2, lam=lamOf(tau), tr=tau*Math.PI/180, br=beta*Math.PI/180;
+  const Aterm=0.012*Math.pow(tau,1.1)*Math.sqrt(lam)-0.0065*beta*Math.pow(0.012*Math.sqrt(lam)*Math.pow(tau,1.1),0.6);
+  const Vm=V*Math.sqrt(Math.max(0.2,1-Aterm/(lam*Math.cos(tr))));
+  const Re=Vm*lam*b/NU, Cf=cf_ittc(Re)+0.0004; const Rf=0.5*RHO*Vm*Vm*lam*b*b*Cf/Math.cos(br); const R=W*Math.tan(tr)+Rf/Math.cos(tr);
+  const valid=(CV>=0.6&&CV<=13&&tau>=2&&tau<=15&&lam<=LWL/b);
+  return {R,tau,lam,CV,Re,Rf,Rp:W*Math.tan(tr),valid,wettedL:lam*b};
+}
+function resistance(p,hs,W,Vkn,opts={}){
+  const V=Vkn*0.514444; if(V<=0) return {V:0,Vkn:0,R:0,PE:0,PB:0,regime:'정지',FnL:0,FnV:0,slender:0,Re:1e4,Cf:0,k:0,Rv:0,Rr:0,Rair:0,Rapp:0,w:0,sav:null};
+  const nH=p.hullType==='cat'?2:1; const vol=Math.max(hs.vol,1e-4), LWL=Math.max(hs.LWL,0.3), S=Math.max(hs.S,1e-3);
+  const FnL=V/Math.sqrt(g*LWL), FnV=V/Math.sqrt(g*Math.cbrt(vol/nH)); const slender=LWL/Math.cbrt(vol/nH);
+  const Re=V*LWL/NU, Cf=cf_ittc(Re)+0.0004; const k=0.15+1.2*Math.pow(Math.cbrt(vol/nH)/LWL,2); const Rv=0.5*RHO*V*V*S*Cf*(1+k);
+  const CR0=0.0035*Math.pow(5.0/clamp(slender,3,9),2.2); const CR=CR0*Math.pow(FnL/0.4,4)/(1+Math.pow(FnL/0.55,6));
+  let Rr=0.5*RHO*V*V*S*CR; if(p.hullType==='cat'){const sep=(p.B-p.B*p.demiFrac)/LWL;Rr*=(1+0.25*Math.exp(-6*Math.max(0,sep-0.2)));}
+  const Rdisp=Rv+Rr; const b=p.hullType==='cat'?Math.max(hs.Bwl,0.1):Math.max(hs.Bwl,0.2);
+  let sav=null,Rplan=Rdisp; if(FnV>1.0){sav=savitsky(W*g/nH,V,b,p.deadrise,LWL,opts.lcgFrac||0.40);if(sav.valid)Rplan=sav.R*nH;}
+  const w=clamp((FnV-1.0)/0.8,0,1); const Rhull=(1-w)*Rdisp+w*Rplan;
+  const Afront=p.B*Math.max(p.D+(p.ridge||0)-hs.T,0.05)+(opts.mastArea||0.08); const Rair=0.5*RHO_AIR*V*V*Afront*0.9; const Rapp=0.04*Rhull; const R=Rhull+Rair+Rapp;
+  const eta=opts.eta||0.5; const regime=FnV<1.0?'배수량 모드':(FnV<1.8?'반활주(천이) 모드':'활주 모드');
+  return {V,Vkn,FnL,FnV,slender,Re,Cf,k,Rv,Rr,Rdisp,Rplan,Rhull,Rair,Rapp,R,PE:R*V,PB:R*V/eta,regime,sav,w};
+}
+function resistanceCurve(p,hs,W,VmaxKn,opts){const out=[];for(let i=1;i<=24;i++)out.push(resistance(p,hs,W,VmaxKn*i/24,opts));return out;}
+function pressureAt(s,z,T,V){if(z>T)return null;const Cp=s>0.85?0.7*smooth((s-0.85)/0.15):(s<0.15?0.15*(1-s/0.15):-0.18*Math.sin(Math.PI*(s-0.15)/0.7));return RHO*g*(T-z)+0.5*RHO*V*V*Cp;}
+const MATERIALS=[
+ {id:'GFRP',name:'GFRP(유리섬유/에폭시 인퓨전)',rho:1800,price:14000,t0:2.5,t1:1.0,struct:1.35,labor:9,tooling:18e6,method:'몰드 인퓨전/핸드레이업'},
+ {id:'CFRP',name:'CFRP(탄소섬유/에폭시)',rho:1550,price:65000,t0:1.8,t1:0.7,struct:1.30,labor:13,tooling:28e6,method:'몰드 프리프레그/인퓨전'},
+ {id:'HDPE',name:'HDPE(해양용 판재 용접)',rho:950,price:5500,t0:6.0,t1:1.6,struct:1.25,labor:6,tooling:3e6,method:'판재 열성형+압출용접'},
+ {id:'AL5083',name:'알루미늄 5083',rho:2660,price:9500,t0:3.0,t1:0.5,struct:1.45,labor:11,tooling:2.5e6,method:'절단/절곡/용접'},
+ {id:'PLY',name:'해양합판+에폭시',rho:680,price:9000,t0:6.0,t1:1.5,struct:1.40,labor:10,tooling:1.5e6,method:'스티치&글루'},
+ {id:'PETG',name:'PETG/ASA 3D프린트(대형 FGF)',rho:1270,price:28000,t0:4.0,t1:1.2,struct:1.20,labor:3,tooling:0,method:'펠릿 압출 대형 3D프린트'},
+ {id:'PACF',name:'PA12-CF 3D프린트',rho:1200,price:95000,t0:3.0,t1:0.9,struct:1.15,labor:3,tooling:0,method:'FGF/SLS 대형 3D프린트'}
+];
+function hullSurfaceArea(hulls){let A=0,Adeck=0;for(const h of hulls){for(let i=0;i<h.secs.length-1;i++){const a=h.secs[i].poly,b=h.secs[i+1].poly,dx=h.secs[i+1].x-h.secs[i].x;let ga=0,gb=0;for(let j=0;j<a.length;j++){const a2=a[(j+1)%a.length],b2=b[(j+1)%b.length];ga+=Math.hypot(a2[0]-a[j][0],a2[1]-a[j][1]);gb+=Math.hypot(b2[0]-b[j][0],b2[1]-b[j][1]);}A+=0.5*(ga+gb)*dx;Adeck+=0.5*(2*h.secs[i].h.yd+2*h.secs[i+1].h.yd)*dx;}}return {shell:A*1.03,deck:Adeck};}
+function costEstimate(p,hulls,mat,econ){
+  const area=hullSurfaceArea(hulls); const t=(mat.t0+mat.t1*p.L)/1000;
+  const shellMass=area.shell*t*mat.rho, structMass=shellMass*mat.struct;
+  const matCost=structMass*mat.price*(1+(econ.scrap||0.15)); const laborH=mat.labor*area.shell*(econ.laborFactor||1); const laborCost=laborH*(econ.laborRate||35000);
+  const tooling=mat.tooling/Math.max(1,econ.units||1); const finish=(econ.finishPerM2||120000)*area.shell; const sub=matCost+laborCost+tooling+finish; const total=sub*(1+(econ.overhead||0.25));
+  return {area,t_mm:t*1000,shellMass,structMass,matCost,laborH,laborCost,tooling,finish,total};
+}
+function buildMesh(p,s0,s1,opts={}){
+  const hulls=buildHulls(Object.assign({},p,{nSt:opts.nSt||p.nSt||41}),s0,s1); const tris=[]; const push=(a,b,c)=>tris.push([a,b,c]); const V3=(sec,q)=>[sec.x,q[0],q[1]];
+  const ring=(S,polys,flip)=>{for(let i=0;i<S.length-1;i++){const A=polys[i],B=polys[i+1],n=A.length;for(let j=0;j<n;j++){const a0=V3(S[i],A[j]),a1=V3(S[i],A[(j+1)%n]),b0=V3(S[i+1],B[j]),b1=V3(S[i+1],B[(j+1)%n]);if(flip){push(a0,b1,b0);push(a0,a1,b1);}else{push(a0,b0,b1);push(a0,b1,a1);}}}};
+  for(const h of hulls){const S=h.secs; ring(S,S.map(s=>s.poly),false);
+    const cap=(sec,rev)=>{const P=sec.poly;let cx=0,cz=0;P.forEach(q=>{cx+=q[0];cz+=q[1];});cx/=P.length;cz/=P.length;for(let j=0;j<P.length;j++){const a=V3(sec,P[j]),b=V3(sec,P[(j+1)%P.length]),c=[sec.x,cx,cz];rev?push(a,c,b):push(a,b,c);}};
+    cap(S[0],false);cap(S[S.length-1],true);
+    if(opts.wall>0){const w=opts.wall;const inner=S.map(sec=>{const P=sec.poly;let cx=0,cz=0;P.forEach(q=>{cx+=q[0];cz+=q[1];});cx/=P.length;cz/=P.length;return P.map(q=>{const dx=q[0]-cx,dz=q[1]-cz,r=Math.hypot(dx,dz)||1e-6;const f=Math.max(0.05,1-w/r);return [cx+dx*f,cz+dz*f];});}); ring(S,inner,true);}
+  }
+  return {tris,hulls};
+}
+function trisToSTL(tris,scale=1000,name='usv_hull'){const n=tris.length,buf=new ArrayBuffer(84+n*50),dv=new DataView(buf);const hdr=(name+' ').padEnd(80,' ');for(let i=0;i<80;i++)dv.setUint8(i,hdr.charCodeAt(i)&0x7f);dv.setUint32(80,n,true);let o=84;
+  for(const t of tris){const [a,b,c]=t.map(v=>v.map(x=>x*scale));const u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];const nx=u[1]*v[2]-u[2]*v[1],ny=u[2]*v[0]-u[0]*v[2],nz=u[0]*v[1]-u[1]*v[0];const l=Math.hypot(nx,ny,nz)||1;[nx/l,ny/l,nz/l,...a,...b,...c].forEach(x=>{dv.setFloat32(o,x,true);o+=4;});dv.setUint16(o,0,true);o+=2;}return buf;}
+function linesPlanSVG(p,hulls,T){
+  const W=1200,H=900,m=40;const sc=(W-2*m)/p.L*0.6;const seg=[];const line=(pts,cls)=>seg.push('<polyline fill="none" class="'+cls+'" points="'+pts.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ')+'"/>');
+  const bx=W*0.78,bz=H*0.30;
+  for(const h of hulls){h.secs.forEach((sec,i)=>{if(i%4)return;const fore=sec.s>=0.5;const pts=sec.poly.filter(q=>fore?q[0]-h.yOff>=-1e-9:q[0]-h.yOff<=1e-9).map(q=>[bx+q[0]*sc,bz-q[1]*sc]);line(pts,fore?'fore':'aft');});}
+  line([[bx-p.B*sc*0.7,bz-T*sc],[bx+p.B*sc*0.7,bz-T*sc]],'wl');
+  const px=m,pz=H*0.30;
+  for(const h of hulls){line(h.secs.map(s=>[px+s.x*sc,pz-s.h.zk*sc]),'keel');line(h.secs.map(s=>[px+s.x*sc,pz-s.h.zc*sc]),'chine');line(h.secs.map(s=>[px+s.x*sc,pz-p.D*sc]),'deck');line(h.secs.map(s=>[px+s.x*sc,pz-s.h.zt*sc]),'deck');}
+  line([[px,pz-T*sc],[px+p.L*sc,pz-T*sc]],'wl');line([[px,pz],[px,pz-p.D*sc]],'deck');line([[px+p.L*sc,pz],[px+p.L*sc,pz-p.D*sc]],'deck');
+  const hx=m,hz=H*0.62;
+  for(const h of hulls){line(h.secs.map(s=>[hx+s.x*sc,hz-(s.h.yd+h.yOff)*sc]),'deck');line(h.secs.map(s=>[hx+s.x*sc,hz-(s.h.yc+h.yOff)*sc]),'chine');
+    const wl=h.secs.map(s=>{const c=clipBelow(s.poly,T);let ymax=-Infinity;c.forEach(q=>{if(Math.abs(q[1]-T)<1e-9)ymax=Math.max(ymax,q[0]);});return isFinite(ymax)?[hx+s.x*sc,hz-ymax*sc]:null;}).filter(Boolean);line(wl,'wl');}
+  line([[hx,hz],[hx+p.L*sc,hz]],'cl');
+  for(let i=0;i<=10;i++){const x=hx+p.L*sc*i/10;line([[x,hz+5],[x,hz-5]],'cl');seg.push('<text x="'+x.toFixed(1)+'" y="'+(hz+18)+'" font-size="10" text-anchor="middle">ST'+i+'</text>');}
+  const title='USV 선도(Lines Plan)  L='+p.L+' m  B='+p.B+' m  D='+p.D+' m  ridge='+(p.ridge||0)+' m  T='+T.toFixed(3)+' m  deadrise='+p.deadrise+'°';
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'"><style>polyline{stroke-width:1}.fore{stroke:#0a4}.aft{stroke:#a40}.keel{stroke:#000;stroke-width:1.5}.chine{stroke:#06c}.deck{stroke:#000}.wl{stroke:#09f;stroke-dasharray:6 3}.cl{stroke:#888;stroke-dasharray:2 2}</style><rect width="100%" height="100%" fill="#fff"/><text x="'+m+'" y="24" font-size="16" font-family="sans-serif">'+title+'</text><text x="'+m+'" y="'+(H*0.30+24)+'" font-size="12">측면도(Profile)</text><text x="'+(W*0.68)+'" y="'+(H*0.30+24)+'" font-size="12">정면도(Body plan) 좌:선미 / 우:선수</text><text x="'+m+'" y="'+(H*0.62+36)+'" font-size="12">평면도(Half-breadth)</text>'+seg.join('')+'</svg>';
+}
+return {g,RHO,BASELINE,OBS_VARIANT,MATERIALS,buildHulls,hydro,solveDraft,resistance,resistanceCurve,savitsky,pressureAt,hullSurfaceArea,costEstimate,buildMesh,trisToSTL,linesPlanSVG,clipBelow};
+})();
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const $=id=>document.getElementById(id);
+const fmt=(v,d=2)=>(v===undefined||v===null||isNaN(v))?'-':Number(v).toLocaleString('ko-KR',{maximumFractionDigits:d,minimumFractionDigits:d});
+const won=v=>Math.round(v).toLocaleString('ko-KR')+' 원';
+const B=USV.BASELINE;
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.pane').forEach(x=>x.classList.remove('on'));b.classList.add('on');$(b.dataset.t).classList.add('on'); viewers.forEach(v=>v.resize());});
+// ---------- generic three.js viewer ----------
+const viewers=[];
+function makeViewer(canvas,bg){
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true}); renderer.setPixelRatio(devicePixelRatio);
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(bg);
+  const camera=new THREE.PerspectiveCamera(40,1,0.01,100); camera.position.set(4,2.4,3);
+  const controls=new OrbitControls(camera,canvas); controls.enableDamping=true;
+  scene.add(new THREE.HemisphereLight(0xffffff,0x667788,1.1)); const dl=new THREE.DirectionalLight(0xffffff,1.2); dl.position.set(3,5,2); scene.add(dl);
+  scene.add(new THREE.GridHelper(12,24,0x99aabb,0xc8d2dc));
+  const v={renderer,scene,camera,controls,objs:[],fitted:false,
+    resize(){const w=canvas.clientWidth,h=canvas.clientHeight||420; if(w<2) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();},
+    clear(){v.objs.forEach(o=>scene.remove(o)); v.objs=[];},
+    add(o){scene.add(o); v.objs.push(o);},
+    fit(p){if(v.fitted) return; controls.target.set(0,p.D/2,0); camera.position.set(p.L*0.9,p.L*0.5,p.L*0.75); v.fitted=true;}};
+  (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
+  window.addEventListener('resize',v.resize); v.resize(); viewers.push(v); return v;
+}
+function colorMap(t){const c=new THREE.Color(); c.setHSL((1-Math.max(0,Math.min(1,t)))*0.66,0.9,0.5); return c;}
+function hullGeometry(p,hs,V,pressure){
+  const mesh=USV.buildMesh(p,0,1,{nSt:61}); const pos=[],col=[]; let pmax=1e-6; const pr=[];
+  mesh.tris.forEach(t=>t.forEach(v=>{const pv=pressure?USV.pressureAt(v[0]/p.L,v[2],hs.T,V):null; pr.push(pv); if(pv!==null) pmax=Math.max(pmax,pv);}));
+  let k=0; mesh.tris.forEach(t=>t.forEach(v=>{pos.push(v[0]-p.L/2,v[2],v[1]); const pv=pr[k++]; const c=(pv===null)?new THREE.Color(pressure?0xd8dde3:0x3a3f45):colorMap(pv/pmax); col.push(c.r,c.g,c.b);}));
+  const geo=new THREE.BufferGeometry(); geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3)); geo.computeVertexNormals(); return {geo,pmax};
+}
+function drawHull(v,p,hs,V,pressure,showWL){
+  v.clear(); const {geo,pmax}=hullGeometry(p,hs,V,pressure);
+  v.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,metalness:pressure?0.1:0.35,roughness:pressure?0.6:0.45})));
+  v.add(new THREE.LineSegments(new THREE.WireframeGeometry(geo),new THREE.LineBasicMaterial({color:pressure?0x223344:0x9aa4ad,transparent:true,opacity:pressure?0.12:0.18})));
+  if(showWL){const wg=new THREE.PlaneGeometry(p.L*1.6,p.B*3); wg.rotateX(-Math.PI/2); const wm=new THREE.Mesh(wg,new THREE.MeshBasicMaterial({color:0x3399ff,transparent:true,opacity:0.25,side:THREE.DoubleSide})); wm.position.y=hs.T; v.add(wm);}
+  v.fit(p); return pmax;
+}
+// ---------- Stage 1: MAGURA V5 baseline ----------
+const v1=makeViewer($('view1'),0xdfe6ee);
+function baselineState(){const p=Object.assign({},B.params); const hulls=USV.buildHulls(p); const mat=USV.MATERIALS.find(m=>m.id===B.mat); const ce=USV.costEstimate(p,hulls,mat,{units:50}); const W=B.mass; const hs=USV.solveDraft(hulls,W,p.L,p.D); return {p,hulls,ce,W,hs,mat};}
+function renderBaseline(){
+  const s=baselineState(); const opts={lcgFrac:B.lcg,eta:0.55,mastArea:0.1};
+  drawHull(v1,s.p,s.hs,B.cruise*0.5144,false,$('b_showWL').checked);
+  const r22=USV.resistance(s.p,s.hs,s.W,B.cruise,opts), r42=USV.resistance(s.p,s.hs,s.W,B.burst,opts);
+  const rows=[['수선장 LWL',fmt(s.hs.LWL,2)+' m'],['계산 흘수 (공표 '+B.draft+' m)',fmt(s.hs.T,3)+' m'],['수선상 높이 선측/릿지 정점 (공표 '+B.hAboveWL+' m)',fmt(s.p.D-s.hs.T,2)+' / '+fmt(s.p.D+s.p.ridge-s.hs.T,2)+' m'],['배수용적 / 침수표면적',fmt(s.hs.vol,2)+' m³ / '+fmt(s.hs.S,1)+' m²'],['외판 전개면적(갑판 포함)',fmt(s.ce.area.shell,1)+' m²'],['CFRP 선체 구조중량 추정',fmt(s.ce.structMass,0)+' kg (두께 '+fmt(s.ce.t_mm,1)+' mm)'],['선체 제외 장비·연료·추진 추정',fmt(B.mass-B.payload_kg-s.ce.structMass,0)+' kg'],
+   ['순항 '+B.cruise+' kn: 운항영역 / 저항 / 소요출력',r22.regime+' / '+fmt(r22.R,0)+' N / '+fmt(r22.PB/1000,0)+' kW'],['최고 '+B.burst+' kn: 트림 / 저항 / 소요출력',(r42.sav?fmt(r42.sav.tau,1)+'° / ':'')+fmt(r42.R,0)+' N / '+fmt(r42.PB/1000,0)+' kW ('+fmt(r42.PB/745.7,0)+' hp)'],['Fn∇ (순항 / 최고)',fmt(r22.FnV,2)+' / '+fmt(r42.FnV,2)]];
+  $('b_calc').innerHTML=rows.map(x=>'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td></tr>').join('');
+  const saved=localStorage.getItem('img_magura')||''; {const box=$('b_imgbox'); box.replaceChildren(); if(/^https?:\/\//.test(saved)){const im=document.createElement('img'); im.src=saved; im.referrerPolicy='no-referrer'; box.append(im);} else {const sp=document.createElement('span'); sp.textContent='사진 URL(https://…)을 붙여넣으면 표시됩니다'; box.append(sp);}} $('b_imgurl').value=saved;
+}
+$('b_showWL').onchange=renderBaseline; $('b_imgurl').onchange=()=>{localStorage.setItem('img_magura',$('b_imgurl').value.trim()); renderBaseline();};
+function loadPreset(pr){const p=pr.params; $('i_L').value=p.L; $('i_B').value=p.B; $('i_D').value=p.D; $('i_ridge').value=p.ridge; $('i_dead').value=p.deadrise; $('i_hull').value=p.hullType; $('i_bilge').value=p.bilge; $('i_lcg').value=pr.lcg; $('i_equip').value=pr.equip; $('i_pay').value=pr.payload_kg; $('i_V').value=pr.speed; $('i_manualW').checked=false; $('i_Wtot').disabled=true; state.mat=pr.mat; document.querySelector('[data-t="p2"]').click(); update();}
+$('b_use').onclick=()=>loadPreset(Object.assign({},B,{equip:B.mass-B.payload_kg-baselineState().ce.structMass}));
+$('b_obs').onclick=()=>loadPreset(USV.OBS_VARIANT);
+// ---------- Stage 2 ----------
+const v2=makeViewer($('view'),0xe9eef3);
+const state={mat:'GFRP',last:null};
+function readParams(){return {L:+$('i_L').value,B:+$('i_B').value,D:+$('i_D').value,ridge:+$('i_ridge').value,deadrise:+$('i_dead').value,hullType:$('i_hull').value,demiFrac:+$('i_demi').value,bilge:+$('i_bilge').value,nSt:41};}
+function readEcon(){return {laborRate:+$('e_rate').value,units:+$('e_units').value,overhead:+$('e_over').value/100,scrap:+$('e_scrap').value/100,finishPerM2:+$('e_finish').value,laborFactor:1};}
+function currentMaterial(){return USV.MATERIALS.find(m=>m.id===state.mat);}
+function update(){
+  const p=readParams(); if(!(p.L>0&&p.B>0&&p.D>0)) return;
+  $('i_demi').parentElement.style.display=p.hullType==='cat'?'':'none';
+  const hulls=USV.buildHulls(p);
+  const ce=USV.costEstimate(p,hulls,currentMaterial(),readEcon());
+  const manual=$('i_manualW').checked;
+  const W=manual?+$('i_Wtot').value:(ce.structMass+ +$('i_equip').value+ +$('i_pay').value);
+  const hullMass=manual?Math.max(0,W-(+$('i_equip').value)-(+$('i_pay').value)):ce.structMass;
+  $('o_hullMass').textContent=fmt(ce.structMass,1)+' kg ('+currentMaterial().id+', 두께 '+fmt(ce.t_mm,1)+' mm)';
+  const hs=USV.solveDraft(hulls,W,p.L,p.D);
+  const Vkn=+$('i_V').value; const opts={lcgFrac:+$('i_lcg').value,eta:+$('i_eta').value,mastArea:+$('i_mast').value};
+  const r=USV.resistance(p,hs,W,Vkn,opts);
+  const KG=p.D*(+$('i_kg').value); const GM=hs.KB+hs.BM-KG;
+  const endur=+$('i_end').value; const hotel=+$('i_hotel').value; const Ebat=(r.PB+hotel)*endur/1000; const solar=ce.area.deck*0.6*200;
+  const rows=[['총 중량 W',fmt(W,1)+' kg'],['흘수 T',hs.ok?fmt(hs.T,3)+' m':'⚠ 부력 부족(선체 높이 증가 필요)'],['건현(선측) / 릿지 정점 높이',fmt(p.D-hs.T,3)+' / '+fmt(p.D+p.ridge-hs.T,3)+' m'],['배수용적 ∇',fmt(hs.vol,3)+' m³'],['수선장 LWL',fmt(hs.LWL,2)+' m'],['수선폭 Bwl',fmt(hs.Bwl,2)+' m'],['침수표면적 S',fmt(hs.S,2)+' m²'],['수선면적 Awp',fmt(hs.Awp,2)+' m²'],['방형계수 CB / 주형계수 CP',fmt(hs.CB,3)+' / '+fmt(hs.CP,3)],['세장비 L/∇^⅓',fmt(r.slender,2)],['LCB (선미 기준)',fmt(hs.LCB,2)+' m ('+fmt(hs.LCB/p.L*100,0)+'% L)'],['KB / BM / KG',fmt(hs.KB,3)+' / '+fmt(hs.BM,3)+' / '+fmt(KG,3)+' m'],['초기 복원성 GM',(GM>0?'':'⚠ ')+fmt(GM,3)+' m'],
+   ['—','—'],['설계속력',fmt(Vkn,1)+' kn ('+fmt(r.V,2)+' m/s)'],['Fn(L) / Fn(∇)',fmt(r.FnL,3)+' / '+fmt(r.FnV,3)],['운항 영역',r.regime],['Re / Cf(ITTC-57) / (1+k)',r.Re.toExponential(2)+' / '+r.Cf.toFixed(5)+' / '+fmt(1+r.k,3)],['점성저항 Rv',fmt(r.Rv,1)+' N'],['잉여(조파)저항 Rr',fmt(r.Rr,1)+' N'],['활주(Savitsky) 저항',r.sav?(fmt(r.sav.R,1)+' N  (τ='+fmt(r.sav.tau,1)+'°, λ='+fmt(r.sav.lam,2)+(r.sav.valid?', 유효)':', 적용범위 밖→배수량식 사용)')):'해당 없음'],['천이 가중치 w(활주)',fmt(r.w,2)],['공기저항 / 부가물',fmt(r.Rair,1)+' / '+fmt(r.Rapp,1)+' N'],['총 저항 R_T',fmt(r.R,1)+' N'],['유효마력 P_E',fmt(r.PE,0)+' W'],['소요 추진출력 P_B (η='+opts.eta+')',fmt(r.PB,0)+' W'],['항속 '+endur+' h 배터리(추진+호텔 '+hotel+' W)',fmt(Ebat,2)+' kWh'],['갑판 태양광 추정(60% 면적, 200 W/m²)',fmt(solar,0)+' Wp']];
+  $('o_table').innerHTML=rows.map(x=>x[0]==='—'?'<tr><td colspan=2><hr></td></tr>':'<tr><td>'+x[0]+'</td><td>'+x[1]+'</td></tr>').join('');
+  const pmax=drawHull(v2,p,hs,r.V,true,$('i_showWL').checked); $('pmax').textContent=fmt(pmax/1000,2)+' kPa';
+  renderVerdict(p,hulls,hs,W,r,hullMass,opts);
+  drawCurve(USV.resistanceCurve(p,hs,W,Math.max(Vkn*1.5,4),opts),Vkn);
+  state.last={p,hs,W,r,ce,hulls}; renderCost();
+}
+function drawCurve(cv,Vd){
+  const c=$('curve'),ctx=c.getContext('2d'); const w=c.width,h=c.height; ctx.clearRect(0,0,w,h); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+  const m={l:50,r:50,t:16,b:30}; const vmax=cv[cv.length-1].Vkn, Rmax=Math.max(...cv.map(q=>q.R))*1.1||1, Pmax=Math.max(...cv.map(q=>q.PB))*1.1||1;
+  const X=v=>m.l+(w-m.l-m.r)*v/vmax, YR=r=>h-m.b-(h-m.t-m.b)*r/Rmax, YP=p=>h-m.b-(h-m.t-m.b)*p/Pmax;
+  ctx.strokeStyle='#ccc'; ctx.beginPath(); ctx.moveTo(m.l,m.t); ctx.lineTo(m.l,h-m.b); ctx.lineTo(w-m.r,h-m.b); ctx.lineTo(w-m.r,m.t); ctx.stroke();
+  ctx.fillStyle='#333'; ctx.font='11px sans-serif'; for(let i=0;i<=5;i++){const v=vmax*i/5; ctx.fillText(v.toFixed(1)+'kn',X(v)-12,h-10); ctx.fillText((Rmax*i/5).toFixed(0)+'N',4,YR(Rmax*i/5)+4); ctx.fillText((Pmax*i/5/1000).toFixed(1)+'kW',w-m.r+4,YP(Pmax*i/5)+4);}
+  const line=(f,Y,color)=>{ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();cv.forEach((q,i)=>{const x=X(q.Vkn),y=Y(f(q));i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();};
+  line(q=>q.R,YR,'#c0392b'); line(q=>q.Rv,YR,'#2980b9'); line(q=>q.Rr,YR,'#27ae60'); line(q=>q.PB,YP,'#8e44ad');
+  ctx.strokeStyle='#999'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(X(Vd),m.t); ctx.lineTo(X(Vd),h-m.b); ctx.stroke(); ctx.setLineDash([]);
+  const leg=[['총저항 R_T','#c0392b'],['점성 Rv','#2980b9'],['잉여 Rr','#27ae60'],['추진출력 P_B(우축)','#8e44ad']]; leg.forEach((l,i)=>{ctx.fillStyle=l[1];ctx.fillRect(m.l+8+i*130,m.t+4,10,10);ctx.fillStyle='#333';ctx.fillText(l[0],m.l+22+i*130,m.t+13);});
+}
+// ---------- plain-language verdict ----------
+function speedForPower(p,hs,W,Pw,opts){let lo=0,hi=50; for(let i=0;i<40;i++){const m=(lo+hi)/2; if(USV.resistance(p,hs,W,m,opts).PB<Pw) lo=m; else hi=m;} return (lo+hi)/2;}
+function setBox(id,ratio,cls,num,msg){const b=$(id); const f=b.querySelector('.vfill'); f.style.width=Math.max(2,Math.min(100,ratio*100))+'%'; f.className='vfill '+cls; b.querySelector('.vnum').innerHTML='<span class="badge '+cls+'">'+(cls==='g'?'양호':cls==='y'?'주의':'위험')+'</span>'+num; b.querySelector('.vmsg').innerHTML=msg;}
+function renderVerdict(p,hulls,hs,W,r,hullMass,opts){
+  const equip=+$('i_equip').value, pay=+$('i_pay').value, Pw=+$('v_pow').value, bat=+$('v_bat').value, tmaxR=(+$('v_tmax').value)/100;
+  const d=(a,b)=>((a/b-1)*100); $('v_base').innerHTML='기준 MAGURA V5(5.5×1.5 m, 1,000 kg) 대비: 길이 '+fmt(d(p.L,B.L),0)+'%, 폭 '+fmt(d(p.B,B.B),0)+'%, 총중량 '+fmt(d(W,B.mass),0)+'%'+(p.L>5?' <span class="warn">⚠ 전장 5 m 초과(요구조건)</span>':'');
+  const Bfull=USV.hydro(hulls,p.D,p.L).vol*USV.RHO; const reserve=Bfull/W-1; const fb=p.D-hs.T;
+  const c1=!hs.ok?'r':(reserve<0.5||fb<0.08?'y':'g');
+  setBox('vb_buoy',W/Bfull,c1,hs.ok?fmt(reserve*100,0)+'% 여유':'가라앉음',
+    hs.ok?'선측 갑판선까지 잠겼을 때 띄울 수 있는 무게는 <b>'+fmt(Bfull,0)+' kg</b>, 지금 총중량은 '+fmt(W,0)+' kg입니다. 선측 건현은 <b>'+fmt(fb*100,0)+' cm</b>'+(fb<0.08?' — 파도에 쉽게 덮입니다.':' 입니다.')+' 막대는 전체 부력 중 지금 쓰고 있는 비율입니다.'
+          :'총중량('+fmt(W,0)+' kg)이 최대 부력('+fmt(Bfull,0)+' kg)보다 큽니다. 선체 높이·폭·길이를 키우거나 무게를 줄이세요.');
+  const Wmax=USV.hydro(hulls,p.D*tmaxR,p.L).vol*USV.RHO; const maxPay=Wmax-hullMass-equip; const payRatio=maxPay>0?pay/maxPay:2;
+  const c2=maxPay<=0?'r':(payRatio>1?'r':(payRatio>0.8?'y':'g'));
+  setBox('vb_pay',Math.min(1,payRatio),c2,(maxPay>0?fmt(maxPay,0):'0')+' kg까지',
+    '허용 흘수(선체높이의 '+Math.round(tmaxR*100)+'%)까지 가라앉힐 때 총 '+fmt(Wmax,0)+' kg을 띄울 수 있고, 선체 '+fmt(hullMass,0)+' kg·장비 '+fmt(equip,0)+' kg을 빼면 센서 등 <b>탑재 가능 중량은 최대 '+fmt(Math.max(0,maxPay),0)+' kg</b>입니다. 계획 페이로드 '+fmt(pay,0)+' kg'+(payRatio>1?' — 초과입니다.':(payRatio>0.8?' — 거의 한계입니다.':' — 여유 '+fmt(maxPay-pay,0)+' kg.')));
+  const Vach=speedForPower(p,hs,W,Pw,opts); const Vd=+$('i_V').value; const sRatio=Vd>0?Vach/Vd:1;
+  const rd=USV.resistance(p,hs,W,Vd,opts); const hotel=+$('i_hotel').value;
+  const hours=bat*1000/(rd.PB+hotel), rangeNm=hours*Vd; const Vecon=Math.max(1,Math.min(Vd,0.35*Math.sqrt(USV.g*Math.max(hs.LWL,0.5))/0.5144)); const re=USV.resistance(p,hs,W,Vecon,opts); const hoursE=bat*1000/(re.PB+hotel);
+  const c3=sRatio<1?'r':(sRatio<1.15?'y':'g');
+  setBox('vb_spd',Math.min(1,sRatio),c3,fmt(Vach,1)+' kn 가능',
+    '모터 '+fmt(Pw,0)+' W로 낼 수 있는 최고속력은 <b>약 '+fmt(Vach,1)+' kn</b>(목표 '+fmt(Vd,1)+' kn'+(sRatio<1?', 미달 — 목표속력에는 '+fmt(rd.PB,0)+' W 필요':', 달성')+'). 이 선체는 '+fmt(Vd,1)+' kn에서 <b>'+r.regime+'</b>로 달리며, 배터리 '+fmt(bat,1)+' kWh로 목표속력 유지 시 <b>약 '+fmt(hours,1)+'시간·'+fmt(rangeNm,0)+'해리</b>, 경제속력 '+fmt(Vecon,1)+' kn로 가면 약 '+fmt(hoursE,1)+'시간 갑니다.');
+  const KG=p.D*(+$('i_kg').value); const GM=hs.KB+hs.BM-KG; const gmB=GM/p.B;
+  const c4=GM<=0?'r':(gmB<0.08?'y':'g');
+  setBox('vb_stab',Math.min(1,Math.max(0,gmB/0.25)),c4,'GM '+fmt(GM*100,0)+' cm',
+    GM<=0?'무게중심이 너무 높아 <b>전복 위험</b>이 있습니다. 폭을 넓히거나 배터리를 바닥에 배치(KG/D 비 낮춤)하세요.':'복원 여유(GM)가 폭 대비 '+fmt(gmB*100,0)+'%입니다. '+(gmB<0.08?'소형 무인정으로는 다소 낮아 센서 마스트가 높으면 흔들림이 큽니다.':'소형 무인정으로 충분한 수준입니다. 기상관측용 마스트를 높이면 다시 확인하세요.'));
+  const tryP=(mod,label)=>{const q=Object.assign({},p,mod); const hh=USV.buildHulls(q); const ce=USV.costEstimate(q,hh,currentMaterial(),readEcon()); const manual=$('i_manualW').checked; const hm=manual?hullMass:ce.structMass; const Wq=manual?W:hm+equip+pay; const hq=USV.solveDraft(hh,Wq,q.L,q.D); if(!hq.ok) return null; const mp=USV.hydro(hh,q.D*tmaxR,q.L).vol*USV.RHO-hm-equip; const vq=speedForPower(q,hq,Wq,Pw,opts); return {label,dp:mp-maxPay,dv:vq-Vach,dm:hm-hullMass};};
+  const hints=[tryP({L:+(p.L*1.1).toFixed(2)},'길이 +10%'),tryP({B:+(p.B*1.1).toFixed(2)},'폭 +10%'),tryP({D:+(p.D*1.1).toFixed(2)},'선체 높이 +10%'),tryP({deadrise:p.deadrise+5},'데드라이즈 +5°')].filter(Boolean);
+  $('v_hint').innerHTML='<b>무엇을 바꾸면 달라지나요?</b> (다른 조건 고정, 선체중량 자동 재계산)<ul style="margin:4px 0 0 18px;padding:0">'+hints.map(h=>'<li>'+h.label+' → 탑재 가능 중량 '+(h.dp>=0?'+':'')+fmt(h.dp,0)+' kg, 최고속력 '+(h.dv>=0?'+':'')+fmt(h.dv,1)+' kn, 선체중량 '+(h.dm>=0?'+':'')+fmt(h.dm,0)+' kg</li>').join('')+'</ul>';
+}
+// ---------- Stage 3 ----------
+function renderCost(){
+  if(!state.last) return; const {p,hulls}=state.last; const econ=readEcon(); const equip=+$('i_equip').value, pay=+$('i_pay').value; const Vkn=+$('i_V').value; const opts={lcgFrac:+$('i_lcg').value,eta:+$('i_eta').value,mastArea:+$('i_mast').value};
+  const rows=USV.MATERIALS.map(m=>{const c=USV.costEstimate(p,hulls,m,econ); const Wm=c.structMass+equip+pay; const h=USV.solveDraft(hulls,Wm,p.L,p.D); const r=USV.resistance(p,h,Wm,Vkn,opts); return {m,c,Wm,h,r};});
+  $('costBody').innerHTML=rows.map(x=>'<tr class="'+(x.m.id===state.mat?'sel':'')+'"><td><b>'+x.m.name+'</b><br><small>'+x.m.method+'</small></td><td>'+fmt(x.c.t_mm,1)+'</td><td>'+fmt(x.c.structMass,1)+'</td><td>'+fmt(x.Wm,1)+'</td><td>'+fmt(x.h.T,3)+'</td><td>'+fmt(x.r.R,0)+' / '+fmt(x.r.PB,0)+'</td><td>'+won(x.c.matCost)+'</td><td>'+fmt(x.c.laborH,0)+' h<br>'+won(x.c.laborCost)+'</td><td>'+won(x.c.tooling)+'</td><td>'+won(x.c.finish)+'</td><td><b>'+won(x.c.total)+'</b></td><td><button data-m="'+x.m.id+'" class="pick">적용</button></td></tr>').join('');
+  document.querySelectorAll('.pick').forEach(b=>b.onclick=()=>{state.mat=b.dataset.m; update();});
+  const sel=rows.find(x=>x.m.id===state.mat); $('o_area').textContent='외판+갑판 '+fmt(sel.c.area.shell,2)+' m² (갑판 투영 '+fmt(sel.c.area.deck,2)+' m²)';
+  $('matBody').innerHTML=USV.MATERIALS.map((m,i)=>'<tr><td>'+m.id+'</td><td><input data-i="'+i+'" data-k="rho" value="'+m.rho+'"></td><td><input data-i="'+i+'" data-k="price" value="'+m.price+'"></td><td><input data-i="'+i+'" data-k="t0" value="'+m.t0+'"> + <input data-i="'+i+'" data-k="t1" value="'+m.t1+'">×L</td><td><input data-i="'+i+'" data-k="struct" value="'+m.struct+'"></td><td><input data-i="'+i+'" data-k="labor" value="'+m.labor+'"></td><td><input data-i="'+i+'" data-k="tooling" value="'+m.tooling+'"></td></tr>').join('');
+  $('matBody').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{USV.MATERIALS[+inp.dataset.i][inp.dataset.k]=+inp.value; update();});
+}
+// ---------- Stage 4 ----------
+function download(name,data,type){const blob=new Blob([data],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);}
+function printScale(){const p=readParams(); const bed=+$('x_bed').value/1000; const seg=Math.max(1,+$('x_seg').value); const mode=$('x_mode').value; if(mode==='full') return 1; if(mode==='fixed') return 1/(+$('x_scale').value); return Math.min(1,(bed*seg*0.98)/p.L);}
+function updatePrintInfo(){const p=readParams(); const sc=printScale(); const seg=Math.max(1,+$('x_seg').value); $('x_info').innerHTML='축척 <b>1 : '+fmt(1/sc,1)+'</b> → 모형 전장 '+fmt(p.L*sc*1000,0)+' mm, 폭 '+fmt(p.B*sc*1000,0)+' mm, 높이 '+fmt((p.D+p.ridge)*sc*1000,0)+' mm, 분할 '+seg+'개(세그먼트당 '+fmt(p.L*sc*1000/seg,0)+' mm)'+(p.B*sc*1000>+$('x_bed').value?' <span class="warn">⚠ 폭이 베드 크기를 초과</span>':'');}
+['x_bed','x_seg','x_mode','x_scale','x_wall','x_hollow'].forEach(id=>$(id).onchange=updatePrintInfo);
+$('x_stl').onclick=()=>{const p=readParams(); const sc=printScale(); const seg=Math.max(1,+$('x_seg').value); const wall=$('x_hollow').checked?(+$('x_wall').value/1000)/sc:0;
+  for(let i=0;i<seg;i++){const mesh=USV.buildMesh(p,i/seg,(i+1)/seg,{nSt:Math.max(12,Math.round(80/seg)),wall}); const buf=USV.trisToSTL(mesh.tris,1000*sc,'USV_'+p.L+'m_seg'+(i+1)); download('usv_hull_L'+p.L+'m_scale1-'+fmt(1/sc,0).replace(/,/g,'')+(seg>1?'_seg'+(i+1)+'of'+seg:'')+'.stl',buf,'application/octet-stream');}};
+$('x_svg').onclick=()=>{if(!state.last) return; const {p,hulls,hs}=state.last; download('usv_lines_plan.svg',USV.linesPlanSVG(p,hulls,hs.T),'image/svg+xml');};
+$('x_csv').onclick=()=>{if(!state.last) return; const {p,hulls,hs}=state.last; let s='hull,station,x_m,keel_z_m,chine_y_m,chine_z_m,deck_y_m,deck_z_m,top_z_m,wl_halfbreadth_m\n';
+  hulls.forEach((h,hi)=>h.secs.forEach((sec,i)=>{if(i%4) return; const c=USV.clipBelow(sec.poly,hs.T); let ymax=0; c.forEach(q=>{if(Math.abs(q[1]-hs.T)<1e-9) ymax=Math.max(ymax,q[0]-h.yOff);}); s+=[hi+1,i/4,sec.x.toFixed(4),sec.h.zk.toFixed(4),sec.h.yc.toFixed(4),sec.h.zc.toFixed(4),sec.h.yd.toFixed(4),p.D.toFixed(4),sec.h.zt.toFixed(4),ymax.toFixed(4)].join(',')+'\n';}));
+  download('usv_offsets_table.csv','\ufeff'+s,'text/csv');};
+$('x_json').onclick=()=>{if(!state.last) return; const {p,hs,W,r,ce}=state.last; download('usv_spec_sheet.json',JSON.stringify({generated:new Date().toISOString(),baseline:B.name,params:p,material:state.mat,total_weight_kg:W,hydrostatics:hs,resistance:r,cost:ce,inputs:{equip:+$('i_equip').value,payload:+$('i_pay').value,speed_kn:+$('i_V').value}},null,1),'application/json');};
+$('x_png').onclick=()=>{v2.renderer.render(v2.scene,v2.camera); const a=document.createElement('a'); a.href=v2.renderer.domElement.toDataURL('image/png'); a.download='usv_hull_render.png'; a.click();};
+// ---------- wiring ----------
+document.querySelectorAll('#p2 input, #p2 select, #p3 .econ input').forEach(el=>el.addEventListener('input',()=>{clearTimeout(update.t); update.t=setTimeout(update,150);}));
+$('i_manualW').onchange=()=>{$('i_Wtot').disabled=!$('i_manualW').checked; update();}; $('i_Wtot').disabled=true;
+renderBaseline(); loadPreset(USV.OBS_VARIANT); document.querySelector('[data-t="p1"]').click(); updatePrintInfo();
+</script>
+</body></html>

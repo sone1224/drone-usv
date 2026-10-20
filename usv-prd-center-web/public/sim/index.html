@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>수상드론 지상통제소</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <div>
+        <div class="title">수상드론 공통 플랫폼 · 지상통제소(GCS)</div>
+        <div class="sub">운용 시뮬레이터 · PRD 초기본(2026-10-20) 기준</div>
+      </div>
+    </div>
+    <select id="scnPick" title="PRD 9장 검증 계획 리허설">
+      <option value="">검증 시나리오 선택…</option>
+    </select>
+    <a href="busan.html" style="color:#91caff;font-size:12px;text-decoration:none;white-space:nowrap" title="실제 지도(부산 연안) 위 검증 시나리오">🗺 부산 실지도 운용 ↗</a>
+    <div class="clock">
+      <span class="lbl">임무 시간</span><span id="simTime">00:00:00</span>
+    </div>
+    <div class="speed" id="speed">
+      <button data-ts="0" title="일시정지">⏸</button>
+      <button data-ts="1" class="on">1×</button>
+      <button data-ts="5">5×</button>
+      <button data-ts="20">20×</button>
+      <button data-ts="60">60×</button>
+    </div>
+    <div class="opinfo" id="opinfo"></div>
+    <div class="secure" title="COM-10 사이버보안">🔒 링크 암호화 · MAVLink 2 서명</div>
+    <div class="alarmsum" id="alarmSum"></div>
+  </header>
+
+  <main class="layout">
+    <aside class="left">
+      <section class="box">
+        <h3>선단 <small>COM-09 1인 다척 운용</small></h3>
+        <div id="fleet"></div>
+        <div class="addrow">
+          <select id="addModel">
+            <option value="A">A 인명구조형</option>
+            <option value="B">B 해양관측형</option>
+            <option value="C">C 군용 저가 소모형</option>
+            <option value="D">D 국가중요시설 감시형</option>
+          </select>
+          <button id="addBtn">+ 선체 진수</button>
+        </div>
+      </section>
+      <section class="box grow">
+        <h3>경보 <small>COM-07 상태감시</small></h3>
+        <div id="alarms" class="alarms"></div>
+      </section>
+    </aside>
+
+    <section class="center">
+      <div class="mapwrap">
+        <canvas id="map"></canvas>
+        <div id="scn" class="scn" hidden></div>
+        <div class="maptools">
+          <button id="btnFollow">선택 선체 추적</button>
+          <button id="btnFit">전체 보기</button>
+          <div class="legend">
+            <span><i style="background:var(--lte)"></i>LTE 한계</span>
+            <span><i style="background:var(--mesh)"></i>메시</span>
+            <span><i style="background:var(--ais)"></i>AIS</span>
+          </div>
+        </div>
+      </div>
+      <div class="eventlog">
+        <div class="elhead">
+          <h3>운항·상태 기록 <small>COM-08</small></h3>
+          <div class="elctl">
+            <select id="logFilter">
+              <option value="all">전체</option>
+              <option value="cmd">명령</option>
+              <option value="warn">경고 이상</option>
+              <option value="crit">위험</option>
+            </select>
+            <button id="expCsv">원격측정 CSV</button>
+            <button id="expJson">이벤트 JSON</button>
+          </div>
+        </div>
+        <div id="events" class="events"></div>
+      </div>
+    </section>
+
+    <aside class="right">
+      <div class="vhead" id="vhead"></div>
+      <nav class="tabs" id="tabs">
+        <button data-tab="nav" class="on">운항</button>
+        <button data-tab="health">상태감시</button>
+        <button data-tab="comm">통신</button>
+        <button data-tab="mission">임무</button>
+      </nav>
+      <div class="panel" id="panel"></div>
+    </aside>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/sim.js"></script>
+  <script src="js/scenarios.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

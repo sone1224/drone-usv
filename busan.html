@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>부산항 실해역 운용</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root { --bg:#0d1117; --panel:#151b24; --panel2:#1c2430; --line:#2a3442; --fg:#e6edf3; --muted:#8b98a8; --accent:#3b82f6; --ok:#52c41a; --warn:#faad14; --crit:#ff4d4f; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font: 13px "Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif; }
+    body { display: flex; flex-direction: column; overflow: hidden; }
+    button, select { font: inherit; color: var(--fg); background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+    button:hover { border-color: var(--accent); } button.on { background: var(--accent); border-color: var(--accent); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    header { display: flex; align-items: center; gap: 12px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+    header .t { font-weight: 700; font-size: 14px; margin-right: auto; }
+    header .t small { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
+    header a { color: #91caff; text-decoration: none; font-size: 12px; }
+    #clock { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 15px; }
+    .speed { display: flex; gap: 2px; } .speed button { padding: 4px 8px; }
+    .engine { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; padding: 2px 8px; }
+    main { flex: 1; display: grid; grid-template-columns: 330px 1fr; min-height: 0; }
+    aside { background: var(--panel); border-right: 1px solid var(--line); overflow: auto; padding: 12px; display: grid; gap: 12px; align-content: start; }
+    h3 { margin: 0 0 6px; font-size: 13px; } h3 small { color: var(--muted); font-weight: 400; font-size: 11px; margin-left: 4px; }
+    .card { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+    .vrow { display: flex; justify-content: space-between; gap: 6px; padding: 5px 0; border-bottom: 1px dashed rgba(255,255,255,.06); cursor: pointer; }
+    .vrow b { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; }
+    .vrow .m { color: var(--muted); font-size: 11px; }
+    .vrow.sel { background: rgba(59,130,246,.12); border-radius: 6px; }
+    ol { margin: 6px 0; padding-left: 18px; color: var(--muted); line-height: 1.6; }
+    .res { margin-top: 6px; padding: 6px 8px; border-radius: 6px; font-weight: 700; }
+    .res small { display: block; font-weight: 400; margin-top: 2px; }
+    .res.running { background: rgba(59,130,246,.15); color: #91caff; } .res.pass { background: rgba(82,196,26,.18); color: var(--ok); } .res.fail { background: rgba(255,77,79,.18); color: var(--crit); }
+    .btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .hint { color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .alarm { padding: 5px 8px; border-radius: 6px; margin-bottom: 4px; font-size: 12px; }
+    .alarm.crit { background: rgba(255,77,79,.15); border-left: 3px solid var(--crit); } .alarm.warn { background: rgba(250,173,20,.12); border-left: 3px solid var(--warn); }
+    #events { max-height: 210px; overflow: auto; font-size: 12px; font-variant-numeric: tabular-nums; }
+    #events div { padding: 2px 0; border-bottom: 1px dashed rgba(255,255,255,.04); }
+    #events .w { color: var(--warn); } #events .c { color: var(--crit); } #events .i { color: var(--fg); }
+    .mapwrap { position: relative; min-width: 0; }
+    #map { position: absolute; inset: 0; background: #0b2236; }
+    .legend { position: absolute; left: 10px; bottom: 22px; z-index: 500; background: rgba(13,17,23,.85); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 11px; display: grid; gap: 3px; }
+    .legend i { display: inline-block; width: 12px; height: 3px; margin-right: 6px; vertical-align: middle; }
+    .boat { width: 26px; height: 26px; display: grid; place-items: center; }
+    .boat svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,.8)); }
+    .lbl { background: rgba(13,17,23,.82) !important; color: #e6edf3 !important; border: 0 !important; box-shadow: none !important; font-size: 11px !important; padding: 1px 6px !important; border-radius: 4px !important; }
+    .lbl::before { display: none !important; }
+    .lbl.red { color: #ff7875 !important; font-weight: 700; }
+    @media (max-width: 860px) { main { grid-template-columns: 1fr; grid-template-rows: 55vh auto; } aside { order: 2; border-right: 0; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="t">부산항 실해역 운용 · 검증 시나리오<small>실제 지도 위 가상 운용 · 모든 수치는 PRD 목표안 기준 가정값</small></div>
+    <a href="index.html" id="toSim">← 지상통제소 시뮬레이터</a>
+    <select id="scn"></select>
+    <span id="clock">00:00:00</span>
+    <div class="speed" id="speed"><button data-ts="0">⏸</button><button data-ts="1">1×</button><button data-ts="5">5×</button><button data-ts="20" class="on">20×</button><button data-ts="60">60×</button></div>
+    <span class="engine" id="engine">지도 불러오는 중…</span>
+  </header>
+  <main>
+    <aside>
+      <section class="card" id="scnBox"></section>
+      <section><h3>선단 <small>운용자 1명</small></h3><div id="fleet"></div></section>
+      <section><h3>경보</h3><div id="alarms"></div></section>
+      <section><h3>운항·상태 기록</h3><div id="events"></div></section>
+      <p class="hint">지도: Google Maps(키 설정 시) 또는 OpenStreetMap·Esri 위성. 시설 경계구역·요구조자·유출유·미식별 선박·AIS 선박은 훈련용 가상 설정이며 실제 보안구역·항로 정보가 아닙니다.</p>
+    </aside>
+    <div class="mapwrap">
+      <div id="map"></div>
+      <div class="legend">
+        <span><i style="background:#ff4d4f"></i>보안 경계구역(가상)</span>
+        <span><i style="background:#9b8cff"></i>레이더 범위(D)</span>
+        <span><i style="background:#d3adf7"></i>AIS 선박</span>
+        <span><i style="background:#ffd666"></i>경로점</span>
+      </div>
+    </div>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/busan.js"></script>
+</body>
+</html>

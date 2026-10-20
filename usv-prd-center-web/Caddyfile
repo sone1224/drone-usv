@@ -1,0 +1,8 @@
+# DOMAIN(.env) 으로 Let's Encrypt 인증서를 자동 발급한다.
+{$DOMAIN} {
+	encode gzip
+	# SSE(/api/events)와 Claude 스트리밍이 끊기지 않도록 즉시 전달
+	reverse_proxy app:3000 {
+		flush_interval -1
+	}
+}

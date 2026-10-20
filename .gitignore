@@ -1,0 +1,18 @@
+# 로컬 전용
+.claude/
+node_modules/
+*.json.tmp
+logs/
+
+# 비밀값
+usv-prd-center-web/.env
+
+# 회사 내부 자료: 공개 저장소에 올리지 않는다(로컬에만 보관)
+usv-prd-center-web/data/db/company.json
+usv-prd-center-web/data/db/drafts.json
+usv-prd-center-web/docs/PRD.docx
+usv-prd-center-web/docs/PRD.pdf
+
+# 사용자 업로드 사진
+usv-prd-center-web/data/uploads/*
+!usv-prd-center-web/data/uploads/.gitkeep

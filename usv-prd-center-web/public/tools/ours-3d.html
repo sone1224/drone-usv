@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>당사 모델 3D 렌더러</title>
+<style>
+html,body{margin:0;height:100%;background:#0b1520;color:#e6eef6;font-family:"Malgun Gothic","Noto Sans KR",system-ui,sans-serif}
+#bar{position:fixed;left:0;right:0;top:0;z-index:2;display:flex;gap:6px;align-items:center;padding:8px 12px;background:rgba(8,16,26,.82);font-size:13px;flex-wrap:wrap}
+#bar a{color:#9fd3ff;text-decoration:none;margin-right:8px}
+#bar button{font:inherit;background:#1d3a57;color:#fff;border:1px solid #2f5a82;border-radius:6px;padding:5px 10px;cursor:pointer}
+#bar button.on{background:#0b69a3;border-color:#3aa0dd}
+#c{display:block;width:100vw;height:100vh}
+#msg{margin-left:auto;opacity:.8}
+</style>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+</head><body>
+<div id="bar"><a href="../#bench" target="_top">← 수상드론 what's next</a>
+  <button data-m="a">A 인명구조형</button><button data-m="b">B 해양관측형</button><button data-m="c">C 저가 소모형</button><button data-m="d">D 국가중요시설 감시형</button>
+  <button id="save">사진(JPG) 저장</button><span id="msg">드래그 회전 · 휠 확대 · 가상 프로토타입(실물 아님)</span></div>
+<canvas id="c"></canvas>
+<script type="module">
+// 당사 모델 A·B·C·D 가상 프로토타입 3D 렌더러 (물리 기반 재질 · 하늘 · 바다 반사)
+// 형상 참고: 당사 시제품(무광 검정 각진 선체, 선수 파노라마 카메라 포드, 흰 EO/IR 짐벌, 위성 평판, 선미 장비함·통풍구,
+// 흰 안테나 기둥, 측면 스폰슨, 선외기)과 디자인 포스터(경사 핀 타워). 모델 C는 임무 베이 덮개까지만, D는 무장 없음.
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Sky } from 'three/addons/objects/Sky.js';
+import { Water } from 'three/addons/objects/Water.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { ConvexGeometry } from 'three/addons/geometries/ConvexGeometry.js';
+
+const Q = new URLSearchParams(location.search);
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const rnd = (() => { let s = 12345; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); })();
+
+// ---------- 재질 ----------
+const M = {
+  matteBlack: () => new THREE.MeshPhysicalMaterial({ color: 0x1b1e22, roughness: 0.72, metalness: 0.05, clearcoat: 0.15, clearcoatRoughness: 0.6, flatShading: true, side: THREE.DoubleSide }),
+  navy: () => new THREE.MeshPhysicalMaterial({ color: 0x0f1d33, roughness: 0.35, metalness: 0.1, clearcoat: 0.6, clearcoatRoughness: 0.2, flatShading: true, side: THREE.DoubleSide }),
+  gelWhite: () => new THREE.MeshPhysicalMaterial({ color: 0xf2f4f5, roughness: 0.25, metalness: 0.0, clearcoat: 0.8, clearcoatRoughness: 0.12, flatShading: true, side: THREE.DoubleSide }),
+  gray: (c = 0x59626b) => new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.55, metalness: 0.15, clearcoat: 0.3, clearcoatRoughness: 0.4, flatShading: true, side: THREE.DoubleSide }),
+  plastic: (c = 0xf3f5f6) => new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.32, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
+  glass: () => new THREE.MeshPhysicalMaterial({ color: 0x0a0f14, roughness: 0.05, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02 }),
+  lens: () => new THREE.MeshPhysicalMaterial({ color: 0x1b3a55, roughness: 0.02, metalness: 0.6, clearcoat: 1, emissive: 0x05121c }),
+  rubber: () => new THREE.MeshStandardMaterial({ color: 0x121416, roughness: 0.9 }),
+  paint: (c) => new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.4, metalness: 0.05, clearcoat: 0.6, flatShading: true, side: THREE.DoubleSide }),
+  solar: () => new THREE.MeshPhysicalMaterial({ color: 0x0d1d3a, roughness: 0.12, metalness: 0.4, clearcoat: 1, clearcoatRoughness: 0.05 }),
+};
+
+// ---------- 각진 선체(단면 로프트) ----------
+function hullParams(p) {
+  const n = p.n || 9, sec = [];
+  for (let i = 0; i <= n; i++) {
+    const s = i / n, x = (s - 0.5) * p.L;
+    let fb = s < 0.55 ? 0.94 + 0.06 * (s / 0.55) : Math.sqrt(Math.max(0, 1 - Math.pow((s - 0.55) / 0.45, 2)));
+    fb = Math.max(fb, 0.03);
+    const hb = (p.B / 2) * fb, rise = s > 0.45 ? Math.pow((s - 0.45) / 0.55, 1.8) : 0, F = p.F, T = p.T;
+    const rake = rise * p.L * 0.1;
+    sec.push({
+      s, x,
+      keel: V(x - rake, -T + rise * (T + 0.2 * F), 0),
+      chine: [x - rake * 0.6, -T * 0.3 + rise * (T * 0.3 + 0.3 * F), hb * 0.82],
+      knuck: [x - rake * 0.15, F * 0.42 + rise * 0.12 * F, hb],
+      sheer: [x, F + rise * 0.28 * F, hb * 0.9],
+      crown: F + rise * 0.28 * F + 0.06 * p.B * fb,
+    });
+  }
+  return sec;
+}
+function hullMesh(p, mats) {
+  const sec = hullParams(p);
+  const ring = (c) => [V(c.x, c.crown, 0), V(c.sheer[0], c.sheer[1], c.sheer[2]), V(c.knuck[0], c.knuck[1], c.knuck[2]), V(c.chine[0], c.chine[1], c.chine[2]), c.keel,
+    V(c.chine[0], c.chine[1], -c.chine[2]), V(c.knuck[0], c.knuck[1], -c.knuck[2]), V(c.sheer[0], c.sheer[1], -c.sheer[2])];
+  const groupOf = (j) => (j === 0 || j === 7) ? 'deck' : (j === 1 || j === 6) ? 'upper' : 'lower';
+  const pos = { deck: [], upper: [], lower: [] };
+  const tri = (g, a, b, c) => pos[g].push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+  for (let i = 0; i < sec.length - 1; i++) {
+    const A = ring(sec[i]), B = ring(sec[i + 1]);
+    for (let j = 0; j < 8; j++) { const k = (j + 1) % 8, g = groupOf(j); tri(g, A[j], B[j], B[k]); tri(g, A[j], B[k], A[k]); }
+  }
+  const cap = (R, g) => { const c = R.reduce((a, v) => a.add(v.clone()), V(0, 0, 0)).multiplyScalar(1 / R.length); for (let j = 0; j < 8; j++) tri(j === 0 || j === 7 ? 'deck' : g, R[j], R[(j + 1) % 8], c); };
+  cap(ring(sec[0]), 'lower'); cap(ring(sec[sec.length - 1]), 'lower');
+  const grp = new THREE.Group();
+  for (const g of ['deck', 'upper', 'lower']) {
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos[g], 3)); geo.computeVertexNormals();
+    const m = new THREE.Mesh(geo, mats[g]); m.castShadow = m.receiveShadow = true; grp.add(m);
+  }
+  grp.userData.deckY = (s) => { const i = Math.min(sec.length - 2, Math.floor(s * (sec.length - 1))); const t = s * (sec.length - 1) - i; return sec[i].crown * (1 - t) + sec[i + 1].crown * t; };
+  grp.userData.sec = sec;
+  return grp;
+}
+
+// ---------- 부품 ----------
+const add = (g, m, x, y, z, rx = 0, ry = 0, rz = 0) => { m.position.set(x, y, z); m.rotation.set(rx, ry, rz); m.castShadow = m.receiveShadow = true; g.add(m); return m; };
+const convex = (pts, mat) => new THREE.Mesh(new ConvexGeometry(pts.map((p) => V(...p))), mat);
+const box = (w, h, d, mat, r = 0.02) => new THREE.Mesh(new RoundedBoxGeometry(w, h, d, 3, r), mat);
+const cyl = (r1, r2, h, mat, seg = 24) => new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, seg), mat);
+function ptz(scale = 1) {
+  const g = new THREE.Group(), w = M.plastic(0xf4f6f7), d = M.plastic(0xd5dade);
+  add(g, cyl(0.1, 0.11, 0.04, d), 0, 0.02, 0);
+  add(g, cyl(0.075, 0.085, 0.14, w), 0, 0.11, 0);
+  add(g, box(0.15, 0.2, 0.2, w, 0.06), 0, 0.29, 0);
+  add(g, cyl(0.045, 0.045, 0.02, M.glass()), 0.1, 0.32, 0.03, 0, 0, Math.PI / 2);
+  add(g, cyl(0.03, 0.03, 0.02, M.lens()), 0.1, 0.32, 0.03, 0, 0, Math.PI / 2);
+  add(g, cyl(0.03, 0.03, 0.02, M.glass()), 0.1, 0.24, -0.03, 0, 0, Math.PI / 2);
+  g.scale.setScalar(scale); return g;
+}
+function panCam(scale = 1) {
+  const g = new THREE.Group();
+  add(g, convex([[0, 0, -0.16], [0, 0, 0.16], [-0.12, 0, -0.18], [-0.12, 0, 0.18], [-0.02, 0.07, -0.13], [-0.02, 0.07, 0.13], [-0.12, 0.07, -0.15], [-0.12, 0.07, 0.15]], M.gray(0x8a949c)), 0, 0, 0);
+  [-0.09, -0.03, 0.03, 0.09].forEach((z) => add(g, cyl(0.022, 0.022, 0.02, M.lens()), 0.005, 0.035, z, 0, 0, Math.PI / 2));
+  g.scale.setScalar(scale); return g;
+}
+const dome = (r = 0.07) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), M.plastic(0xefe9da)); m.scale.y = 0.55; m.castShadow = true; return m; };
+function satPanel() { const g = new THREE.Group(); add(g, box(0.52, 0.03, 0.42, M.plastic(0xf1f3f4), 0.012), 0, 0.12, 0, 0, 0, -0.18); add(g, cyl(0.03, 0.03, 0.12, M.gray(0x6d7780)), 0, 0.06, 0); return g; }
+const pole = (h = 0.9, r = 0.035) => { const m = cyl(r, r, h, M.plastic(0xeef1f3)); m.geometry.translate(0, h / 2, 0); return m; };
+function outboard(scale = 1) {
+  const g = new THREE.Group(), blk = new THREE.MeshPhysicalMaterial({ color: 0x0d0f11, roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08 });
+  add(g, convex([[-0.05, 0, -0.18], [-0.05, 0, 0.18], [-0.42, 0, -0.17], [-0.42, 0, 0.17], [-0.08, 0.5, -0.15], [-0.08, 0.5, 0.15], [-0.4, 0.55, -0.14], [-0.4, 0.55, 0.14], [-0.2, 0.62, 0]], blk), 0, 0, 0);
+  add(g, box(0.16, 0.9, 0.09, M.gray(0x2a2f33), 0.03), -0.18, -0.42, 0);
+  add(g, box(0.34, 0.1, 0.12, M.gray(0x22272b), 0.04), -0.22, -0.86, 0);
+  add(g, box(0.02, 0.06, 0.3, M.plastic(0xd8dde0), 0.008), -0.06, 0.42, 0, 0, 0, 0.1);
+  g.scale.setScalar(scale); return g;
+}
+function decal(text, color = '#ffffff', w = 1.0, h = 0.22, font = 'bold 120px Arial') {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 224; const x = c.getContext('2d');
+  x.font = font; x.fillStyle = color; x.textBaseline = 'middle'; x.fillText(text, 10, 116);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  return m;
+}
+function stripeTex() {
+  const c = document.createElement('canvas'); c.width = 512; c.height = 256; const x = c.getContext('2d');
+  x.fillStyle = '#5c656d'; x.fillRect(0, 0, 512, 256); x.strokeStyle = '#f2c230'; x.lineWidth = 14; x.setLineDash([40, 24]); x.strokeRect(10, 10, 492, 236);
+  x.fillStyle = '#f2c230'; x.font = 'bold 34px Arial'; x.fillText('MISSION BAY · I/F', 120, 140);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+// ---------- 공통 시제품 계열 장비 배치 ----------
+function familyKit(g, hull, p, o = {}) {
+  const L = p.L, hb = p.B / 2, dy = hull.userData.deckY;
+  const at = (s) => (s - 0.5) * L;
+  // 선수 각진 덮개(plateau)
+  const s0 = 0.5, s1 = 0.86, y0 = dy(0.62) - 0.04, hgt = o.plateauH ?? 0.16;
+  add(g, convex([[at(s0), y0, -hb * 0.78], [at(s0), y0, hb * 0.78], [at(s1), dy(s1) - 0.04, -hb * 0.26], [at(s1), dy(s1) - 0.04, hb * 0.26],
+    [at(s0 + 0.04), y0 + hgt, -hb * 0.52], [at(s0 + 0.04), y0 + hgt, hb * 0.52], [at(s1 - 0.08), y0 + hgt * 0.85, -hb * 0.18], [at(s1 - 0.08), y0 + hgt * 0.85, hb * 0.18]], o.plateauMat || M.matteBlack()), 0, 0, 0);
+  const py = y0 + hgt;
+  add(g, panCam(o.panScale ?? 1), at(s1 - 0.07), py - 0.03, 0, 0, 0, -0.35);
+  add(g, dome(0.065), at(0.66), py, 0);
+  // 선미 장비함 + 통풍구
+  const a0 = 0.12, a1 = 0.42, ay = dy(0.3) - 0.03, ah = o.aftH ?? 0.3;
+  add(g, convex([[at(a0), ay, -hb * 0.62], [at(a0), ay, hb * 0.62], [at(a1), ay, -hb * 0.62], [at(a1), ay, hb * 0.62], [at(a0 + 0.02), ay + ah, -hb * 0.55], [at(a0 + 0.02), ay + ah, hb * 0.55], [at(a1 - 0.03), ay + ah, -hb * 0.55], [at(a1 - 0.03), ay + ah, hb * 0.55]], o.aftMat || M.matteBlack()), 0, 0, 0);
+  const vent = box(0.22, 0.09, 0.02, M.gray(0x111315), 0.01); add(g, vent, at(a1 - 0.1), ay + ah * 0.55, hb * 0.555);
+  for (let i = 0; i < 5; i++) add(g, box(0.012, 0.06, 0.01, M.plastic(0xc9d0d5), 0.003), at(a1 - 0.1) - 0.08 + i * 0.04, ay + ah * 0.55, hb * 0.567);
+  if (o.sat !== false) add(g, satPanel(), at((a0 + a1) / 2), ay + ah, 0);
+  // 측면 스폰슨, 안테나 기둥
+  [1, -1].forEach((sd) => {
+    const sp = new THREE.Mesh(new THREE.CapsuleGeometry(0.09 * (p.B / 1.3), L * 0.28, 6, 16), M.rubber()); add(g, sp, at(0.27), dy(0.27) + 0.06, sd * hb * 0.86, 0, 0, Math.PI / 2);
+    if (o.poles !== false) add(g, pole(o.poleH ?? 0.95), at(0.07), dy(0.07), sd * hb * 0.7);
+  });
+  // 선수 범퍼(카메라형 노브)
+  [1, -1].forEach((sd) => add(g, cyl(0.06, 0.06, 0.08, M.rubber()), at(0.86), dy(0.86) - 0.08, sd * hb * 0.32, Math.PI / 2, 0, 0));
+  return { py, at, dy, ay, ah };
+}
+
+// ---------- 모델 ----------
+function modelA() {
+  const p = { L: 3.4, B: 1.3, F: 0.42, T: 0.22, n: 9 };
+  const g = new THREE.Group(), hull = hullMesh(p, { deck: M.matteBlack(), upper: M.matteBlack(), lower: M.navy() }); g.add(hull);
+  const k = familyKit(g, hull, p, { plateauH: 0.15, aftH: 0.28, poleH: 0.85 });
+  add(g, ptz(1), k.at(0.56), k.py, 0);
+  // 주황 레일(인명구조 식별), 구조부이
+  const sec = hull.userData.sec;
+  [1, -1].forEach((sd) => { const pts = sec.map((c) => V(c.knuck[0], c.knuck[1] + 0.01, sd * (c.knuck[2] + 0.012))); const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 64, 0.018, 8), M.paint(0xff6a1f)); tube.castShadow = true; g.add(tube); });
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.055, 16, 48), new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.5 }));
+  const tex = document.createElement('canvas'); tex.width = 256; tex.height = 16; const tx = tex.getContext('2d'); for (let i = 0; i < 8; i++) { tx.fillStyle = i % 2 ? '#ffffff' : '#d6261a'; tx.fillRect(i * 32, 0, 32, 16); }
+  ring.material.map = new THREE.CanvasTexture(tex); ring.material.map.colorSpace = THREE.SRGBColorSpace;
+  add(g, ring, k.at(0.3), k.ay + k.ah + 0.03, 0, Math.PI / 2, 0, 0);
+  add(g, outboard(0.85), -p.L / 2 - 0.02, 0.05, 0);
+  const d1 = decal('A-01  인명구조', '#ff7a2e', 1.1, 0.24, 'bold 104px Malgun Gothic'); add(g, d1, -0.15, p.F * 0.62, p.B / 2 + 0.005);
+  return { g, p, look: V(0.1, 0.95, 0) };
+}
+function modelB() {
+  const p = { L: 6.0, B: 2.0, F: 0.62, T: 0.32, n: 10 };
+  const g = new THREE.Group(), hull = hullMesh(p, { deck: M.gelWhite(), upper: M.gelWhite(), lower: M.navy() }); g.add(hull);
+  const k = familyKit(g, hull, p, { plateauMat: M.gelWhite(), aftMat: M.gelWhite(), plateauH: 0.2, aftH: 0.38, poleH: 1.3, panScale: 1.3, sat: false });
+  { const sec = hull.userData.sec; [1, -1].forEach((sd) => { const pts = sec.map((c) => V(c.knuck[0], c.knuck[1] + 0.012, sd * (c.knuck[2] + 0.014))); const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 64, 0.03, 8), M.paint(0x0e8f9a)); g.add(tube); }); }
+  add(g, ptz(1.25), k.at(0.56), k.py, 0);
+  for (let i = 0; i < 2; i++) add(g, box(0.78, 0.03, 1.05, M.solar(), 0.01), k.at(0.27) + (i - 0.5) * 0.84, k.ay + k.ah + 0.03, 0, 0, 0, -0.06);
+  add(g, satPanel(), k.at(0.62), k.py, 0.45);
+  // 기상 마스트
+  const mx = k.at(0.45), my = k.py;
+  add(g, cyl(0.035, 0.045, 2.0, M.plastic(0xe9edf0)), mx, my + 1.0, 0);
+  add(g, cyl(0.02, 0.02, 0.9, M.gray(0x8a959e)), mx, my + 1.85, 0, Math.PI / 2, 0, 0);
+  const cups = new THREE.Group(); add(cups, cyl(0.012, 0.012, 0.12, M.gray(0x8a959e)), 0, 0.06, 0);
+  for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2; add(cups, cyl(0.005, 0.005, 0.14, M.gray(0x8a959e)), Math.cos(a) * 0.07, 0.12, Math.sin(a) * 0.07, 0, -a, Math.PI / 2); add(cups, new THREE.Mesh(new THREE.SphereGeometry(0.035, 16, 8, 0, Math.PI), M.plastic()), Math.cos(a) * 0.14, 0.12, Math.sin(a) * 0.14, 0, -a, 0); }
+  add(g, cups, mx, my + 1.86, 0.42);
+  add(g, convex([[0, 0, 0], [-0.3, 0.04, 0], [-0.3, -0.04, 0], [-0.32, 0.12, 0.01], [-0.32, -0.12, 0.01], [-0.32, 0.12, -0.01], [-0.32, -0.12, -0.01], [0.02, 0.01, 0.01], [0.02, -0.01, -0.01]], M.plastic()), mx + 0.05, my + 1.9, -0.42);
+  add(g, pole(0.5, 0.012), mx, my + 2.0, 0);
+  add(g, cyl(0.025, 0.025, 0.9, M.paint(0x6b7782)), p.L / 2 - 0.55, 0.35, 0.3, 0, 0, -0.75);
+  const d1 = decal('B-01  해양관측', '#0b4f60', 1.6, 0.3, 'bold 110px Malgun Gothic'); add(g, d1, -0.9, p.F * 0.66, p.B / 2 + 0.006);
+  return { g, p, look: V(0.2, 1.4, 0) };
+}
+function modelC() {
+  const p = { L: 6.6, B: 1.9, F: 0.55, T: 0.3, n: 10 };
+  const g = new THREE.Group(), hull = hullMesh(p, { deck: M.gray(0x6f7880), upper: M.gray(0x4f5961), lower: M.gray(0x272d32) }); g.add(hull);
+  const k = familyKit(g, hull, p, { plateauMat: M.gray(0x666f77), aftMat: M.gray(0x3a4248), plateauH: 0.12, aftH: 0.26, poleH: 0.8, sat: false });
+  // 경사 핀 타워
+  const fx = k.at(0.36), fy = k.dy(0.36) - 0.02, hb = p.B / 2;
+  add(g, convex([[fx - 0.55, fy, -hb * 0.42], [fx - 0.55, fy, hb * 0.42], [fx + 0.55, fy, -hb * 0.42], [fx + 0.55, fy, hb * 0.42], [fx - 0.35, fy + 1.15, -0.16], [fx - 0.35, fy + 1.15, 0.16], [fx + 0.05, fy + 1.15, -0.16], [fx + 0.05, fy + 1.15, 0.16]], M.gray(0x7b858d)), 0, 0, 0);
+  add(g, convex([[fx + 0.07, fy + 1.16, -0.17], [fx + 0.07, fy + 1.16, 0.17], [fx + 0.24, fy + 0.8, -0.24], [fx + 0.24, fy + 0.8, 0.24], [fx + 0.04, fy + 1.16, -0.16], [fx + 0.04, fy + 1.16, 0.16], [fx + 0.21, fy + 0.8, -0.23], [fx + 0.21, fy + 0.8, 0.23]], M.glass()), 0, 0, 0);
+  add(g, ptz(0.95), fx - 0.15, fy + 1.15, 0);
+  add(g, pole(0.55, 0.012), fx - 0.32, fy + 1.15, 0.1);
+  // 임무 베이 덮개(인터페이스까지만)
+  const bay = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.9), new THREE.MeshStandardMaterial({ map: stripeTex(), roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2 }));
+  add(g, bay, k.at(0.57), k.dy(0.57) + 0.075, 0, -Math.PI / 2, 0, 0);
+  const d1 = decal('C-01', '#d6dce0', 0.7, 0.24, 'bold 120px Arial'); d1.material.opacity = 0.7; add(g, d1, -1.2, p.F * 0.62, p.B / 2 + 0.006);
+  return { g, p, look: V(0.4, 1.3, 0) };
+}
+function modelD() {
+  const p = { L: 4.6, B: 1.6, F: 0.5, T: 0.27, n: 9 };
+  const g = new THREE.Group(), hull = hullMesh(p, { deck: M.matteBlack(), upper: M.matteBlack(), lower: M.navy() }); g.add(hull);
+  const k = familyKit(g, hull, p, { plateauH: 0.16, aftH: 0.3, poleH: 1.0 });
+  add(g, ptz(1.1), k.at(0.58), k.py, 0);
+  // 레이더 마스트 + 바(rotating) 안테나
+  const mx = k.at(0.4), my = k.dy(0.4);
+  add(g, convex([[mx - 0.18, my, -0.18], [mx + 0.18, my, -0.18], [mx - 0.18, my, 0.18], [mx + 0.18, my, 0.18], [mx - 0.06, my + 1.1, -0.06], [mx + 0.06, my + 1.1, -0.06], [mx - 0.06, my + 1.1, 0.06], [mx + 0.06, my + 1.1, 0.06]], M.matteBlack()), 0, 0, 0);
+  add(g, cyl(0.07, 0.07, 0.12, M.gray(0x3a4248)), mx, my + 1.16, 0);
+  add(g, box(0.14, 0.1, 1.2, M.plastic(0xf2f4f5), 0.04), mx, my + 1.27, 0, 0, 0.5, 0);
+  add(g, pole(0.45, 0.01), mx + 0.02, my + 1.32, 0.12);
+  // 탐조등·경고 스피커
+  const lampG = new THREE.Group();
+  add(lampG, cyl(0.1, 0.12, 0.2, M.gray(0x2a3035)), 0, 0, 0, 0, 0, Math.PI / 2);
+  const lens = cyl(0.095, 0.095, 0.01, new THREE.MeshStandardMaterial({ color: 0xfff6d8, emissive: 0xfff2c4, emissiveIntensity: 3 })); add(lampG, lens, 0.105, 0, 0, 0, 0, Math.PI / 2);
+  add(g, lampG, k.at(0.7), k.py + 0.16, 0.25);
+  add(g, cyl(0.02, 0.02, 0.16, M.gray(0x2a3035)), k.at(0.7), k.py + 0.08, 0.25);
+  const horn = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.04, 0.2, 24, 1, false), M.gray(0x3a4248)); add(g, horn, k.at(0.7), k.py + 0.16, -0.25, 0, 0, -Math.PI / 2);
+  add(g, outboard(1.0), -p.L / 2 - 0.02, 0.05, 0);
+  // 보라 식별 레일
+  const sec = hull.userData.sec;
+  [1, -1].forEach((sd) => { const pts = sec.map((c) => V(c.knuck[0], c.knuck[1] + 0.01, sd * (c.knuck[2] + 0.012))); const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 64, 0.016, 8), M.paint(0x8f7dff)); g.add(tube); });
+  const d1 = decal('D-01  경계감시', '#c8bfff', 1.4, 0.24, 'bold 100px Malgun Gothic'); add(g, d1, -0.4, p.F * 0.62, p.B / 2 + 0.005);
+  return { g, p, look: V(0.2, 1.05, 0), lamp: { obj: lampG } };
+}
+
+// ---------- 환경 ----------
+function waterNormals() {
+  const N = 512, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d'); const img = x.createImageData(N, N);
+  const waves = Array.from({ length: 18 }, () => ({ kx: Math.round((rnd() - 0.5) * 24), ky: Math.round((rnd() - 0.5) * 24), a: 0.4 + rnd(), ph: rnd() * 6.28 }));
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    let dx = 0, dy = 0;
+    for (const w of waves) { const t = (w.kx * i + w.ky * j) / N * 2 * Math.PI + w.ph; const c2 = Math.cos(t) * w.a; dx += c2 * w.kx; dy += c2 * w.ky; }
+    const nx = -dx * 0.012, ny = -dy * 0.012, nz = 1, l = Math.hypot(nx, ny, nz), o = (j * N + i) * 4;
+    img.data[o] = (nx / l * 0.5 + 0.5) * 255; img.data[o + 1] = (ny / l * 0.5 + 0.5) * 255; img.data[o + 2] = (nz / l * 0.5 + 0.5) * 255; img.data[o + 3] = 255;
+  }
+  x.putImageData(img, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+}
+let WN = waterNormals();
+await new Promise((res) => new THREE.TextureLoader().load("https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/waternormals.jpg", (t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; WN = t; res(); }, undefined, () => res()));
+function foamTex() {
+  const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d');
+  for (let i = 0; i < 6000; i++) { const r = rnd(), yy = rnd() * 512, dens = 1 - Math.abs(yy - 256) / 256; if (rnd() > dens) continue; x.fillStyle = `rgba(255,255,255,${0.06 + r * 0.3})`; x.beginPath(); x.ellipse(rnd() * 512, yy, 3 + rnd() * 22, 1 + rnd() * 5, (rnd() - 0.5) * 0.4, 0, 6.29); x.fill(); }
+  const g = x.createLinearGradient(0, 0, 512, 0); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.25, 'rgba(0,0,0,0)'); g.addColorStop(0.75, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,1)');
+  x.globalCompositeOperation = 'destination-out'; x.fillStyle = g; x.fillRect(0, 0, 512, 512);
+  const t = new THREE.CanvasTexture(c); return t;
+}
+const FOAM = foamTex();
+function wakeMesh(p, speed) {
+  const g = new THREE.Group(), len = p.L * (1.4 + speed * 1.6);
+  const geo = new THREE.PlaneGeometry(len, p.B * (1.1 + speed * 1.2), 32, 4);
+  const pos = geo.attributes.position; for (let i = 0; i < pos.count; i++) { const u = (pos.getX(i) + len / 2) / len; pos.setY(i, pos.getY(i) * (0.5 + 0.9 * (1 - u))); }
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: FOAM, transparent: true, opacity: Math.min(1, 0.75 + speed * 0.4), depthWrite: false, color: 0xffffff }));
+  m.rotation.x = -Math.PI / 2; m.position.set(-p.L / 2 - len / 2 + 0.3, 0.02, 0); g.add(m);
+  // 선측 거품선
+  [1, -1].forEach((sd) => { const s = new THREE.Mesh(new THREE.PlaneGeometry(p.L * 0.9, 0.35 + speed * 0.4), new THREE.MeshBasicMaterial({ map: FOAM, transparent: true, opacity: 0.6, depthWrite: false })); s.rotation.x = -Math.PI / 2; s.position.set(0, 0.015, sd * (p.B / 2 + 0.1)); g.add(s); });
+  // 선수 파도(V자 거품)
+  [1, -1].forEach((sd) => { const bw = new THREE.Mesh(new THREE.PlaneGeometry(p.L * 0.55, 0.28 + speed * 0.5), new THREE.MeshBasicMaterial({ map: FOAM, transparent: true, opacity: Math.min(1, 0.6 + speed * 0.6), depthWrite: false })); bw.rotation.x = -Math.PI / 2; bw.rotation.z = sd * 0.32; bw.position.set(p.L * 0.12, 0.018, sd * (p.B * 0.55)); g.add(bw); });
+  // 선수 물보라(점)
+  const n = Math.round(60 + speed * 260), arr = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) { const sd = rnd() < 0.5 ? 1 : -1; const t = rnd(); arr[i * 3] = p.L * (0.28 - t * 0.25); arr[i * 3 + 1] = Math.pow(rnd(), 2) * (0.15 + speed * 0.6) * (1 - t); arr[i * 3 + 2] = sd * (p.B * 0.35 + t * p.B * 0.5 + rnd() * 0.2); }
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  const spr = document.createElement('canvas'); spr.width = spr.height = 64; const sx = spr.getContext('2d'); const rg = sx.createRadialGradient(32, 32, 0, 32, 32, 32); rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); sx.fillStyle = rg; sx.fillRect(0, 0, 64, 64);
+  g.add(new THREE.Points(pg, new THREE.PointsMaterial({ size: 0.14, map: new THREE.CanvasTexture(spr), transparent: true, depthWrite: false, opacity: 0.45 })));
+  return g;
+}
+function farShore(kind) {
+  const g = new THREE.Group();
+  const ridge = (z, hmax, col, op) => { const pos = []; let prev = null; const N = 420;
+    for (let i = 0; i <= N; i++) { const x = -24000 + (48000 * i) / N; const env = Math.min(1, i / 60, (N - i) / 60); const h = env * hmax * (0.35 + 0.45 * Math.abs(Math.sin(i * 0.11)) + 0.25 * Math.sin(i * 0.037 + 1) + 0.1 * rnd()); const cur = [x, Math.max(2, h)];
+      if (prev) pos.push(prev[0], 0, z, cur[0], 0, z, cur[0], cur[1], z, prev[0], 0, z, cur[0], cur[1], z, prev[0], prev[1], z); prev = cur; }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, depthWrite: false, fog: false })); };
+  if (kind === "night") { g.add(ridge(-3800, 260, 0x0a1222, 1)); }
+  else { g.add(ridge(-9000, 420, 0xbccbd7, 0.75)); g.add(ridge(-7000, 230, 0xa3b6c6, 0.82)); }
+  if (kind === 'night' || kind === 'plant') {
+    const P0 = new THREE.Group(); P0.position.set(-560, 0, 30); g.add(P0); const g0 = g; { const g = P0;
+    const bm = new THREE.MeshStandardMaterial({ color: 0x1a2232, roughness: 0.9 }), lit = new THREE.MeshBasicMaterial({ color: 0xffd27a });
+    [[-60, 0], [10, 0]].forEach(([x]) => { const cy = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, 30, 32), bm); cy.position.set(x, 15, -620); g.add(cy); const dm = new THREE.Mesh(new THREE.SphereGeometry(22, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), bm); dm.position.set(x, 30, -620); g.add(dm); });
+    const tb = new THREE.Mesh(new THREE.BoxGeometry(160, 22, 30), bm); tb.position.set(-20, 11, -650); g.add(tb);
+    for (let i = 0; i < 36; i++) { const l = new THREE.Mesh(new THREE.SphereGeometry(0.7, 6, 4), lit); l.position.set(-95 + rnd() * 150, 3 + rnd() * 16, -634); g.add(l); }
+    { const x = 150; const c = new THREE.Mesh(new THREE.BoxGeometry(4, 64, 4), bm); c.position.set(x, 32, -610); g.add(c); const a = new THREE.Mesh(new THREE.BoxGeometry(70, 2.5, 2.5), bm); a.position.set(x - 20, 60, -610); a.rotation.z = 0.32; g.add(a); const r = new THREE.Mesh(new THREE.SphereGeometry(1.4, 6, 4), new THREE.MeshBasicMaterial({ color: 0xff3b30 })); r.position.set(x, 66, -610); g.add(r); }
+    } }
+  return g;
+}
+
+// ---------- 장면 ----------
+const SCENES = {
+  a: { make: modelA, sun: [40, 215], turb: 1.8, ray: 0.9, water: 0x0d5c8c, speed: 0.35, exposure: 0.42, shore: 'day', cam: [3.9, 1.7, 3.5], fov: 34, yaw: -0.18 },
+  b: { make: modelB, sun: [45, 150], turb: 1.6, ray: 0.8, water: 0x0e6a9a, speed: 0.15, exposure: 0.4, shore: 'day', cam: [6.6, 2.6, 6.2], fov: 34, yaw: -0.1 },
+  c: { make: modelC, sun: [7, 225], turb: 9, ray: 2.8, water: 0x15384f, speed: 0.75, exposure: 0.42, shore: 'none', cam: [7.0, 2.2, 5.8], fov: 36, yaw: -0.22 },
+  d: { make: modelD, sun: [-1.2, 250], turb: 6, ray: 3.6, water: 0x041220, speed: 0.25, exposure: 0.75, shore: 'night', cam: [5.0, 1.9, 4.5], fov: 34, yaw: -0.12 },
+};
+let state = null;
+function build(id) {
+  const S = SCENES[id];
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(S.fov, 1, 0.05, 20000);
+  const sky = new Sky(); sky.scale.setScalar(10000);
+  const u = sky.material.uniforms; u.turbidity.value = S.turb; u.rayleigh.value = S.ray; u.mieCoefficient.value = 0.005; u.mieDirectionalG.value = 0.82;
+  const sun = new THREE.Vector3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(90 - S.sun[0]), THREE.MathUtils.degToRad(S.sun[1]));
+  u.sunPosition.value.copy(sun);
+  const pm = new THREE.PMREMGenerator(renderer); const envScene = new THREE.Scene(); envScene.add(sky);
+  if (id === 'd') { const amb = new THREE.Mesh(new THREE.SphereGeometry(5000, 16, 8), new THREE.MeshBasicMaterial({ color: 0x0b1530, side: THREE.BackSide, transparent: true, opacity: 0.0 })); envScene.add(amb); }
+  scene.environment = pm.fromScene(envScene, 0.02).texture; scene.add(sky);
+  const water = new Water(new THREE.PlaneGeometry(10000, 10000), { textureWidth: 1024, textureHeight: 1024, waterNormals: WN, sunDirection: sun.clone().normalize(), sunColor: id === 'd' ? 0x7788aa : 0xffffff, waterColor: S.water, distortionScale: id === 'c' ? 1.6 : 0.9, fog: false });
+  water.rotation.x = -Math.PI / 2; water.material.uniforms.size.value = id === 'c' ? 14 : 22; scene.add(water);
+  const dl = new THREE.DirectionalLight(id === 'd' ? 0x8899cc : 0xfff1dc, id === 'd' ? 0.35 : 2.4); dl.position.copy(sun).multiplyScalar(30); dl.castShadow = true;
+  dl.shadow.mapSize.set(2048, 2048); const sc = dl.shadow.camera; sc.left = sc.bottom = -6; sc.right = sc.top = 6; sc.near = 1; sc.far = 80; dl.shadow.bias = -0.0005; scene.add(dl);
+  scene.add(new THREE.HemisphereLight(id === 'd' ? 0x5a6aa0 : 0xbfd8ff, 0x1a2a33, id === 'd' ? 0.7 : 0.55));
+  if (S.shore !== 'none') scene.add(farShore(S.shore));
+  const M0 = S.make(); scene.add(M0.g);
+  M0.g.add(wakeMesh(M0.p, S.speed));
+  M0.g.rotation.y = S.yaw;
+  M0.g.position.y = 0; M0.g.rotation.z = S.speed * 0.06; // 활주 트림
+  if (M0.lamp) {
+    const spot = new THREE.SpotLight(0xfff2c4, 120, 60, 0.22, 0.5, 1.2); const lp = new THREE.Vector3(); M0.lamp.obj.getWorldPosition(lp);
+    M0.g.updateMatrixWorld(true); M0.lamp.obj.getWorldPosition(lp); spot.position.copy(lp); spot.target.position.set(lp.x + 14, -1, lp.z + 6); scene.add(spot, spot.target);
+    const sc2 = document.createElement('canvas'); sc2.width = sc2.height = 128; const s2 = sc2.getContext('2d'); const rg2 = s2.createRadialGradient(64, 64, 0, 64, 64, 64); rg2.addColorStop(0, 'rgba(255,244,210,0.9)'); rg2.addColorStop(1, 'rgba(255,244,210,0)'); s2.fillStyle = rg2; s2.fillRect(0, 0, 128, 128);
+    const pool = new THREE.Mesh(new THREE.PlaneGeometry(9, 3.2), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc2), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    pool.rotation.x = -Math.PI / 2; pool.rotation.z = -0.4; pool.position.set(lp.x + 9, 0.03, lp.z + 3.5); scene.add(pool);
+    const shaft = new THREE.Mesh(new THREE.PlaneGeometry(9, 0.9), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc2), transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending }));
+    shaft.position.set(lp.x + 4.5, lp.y * 0.6, lp.z + 1.6); shaft.rotation.set(0, -0.38, -0.12); scene.add(shaft);
+    const glow = new THREE.PointLight(0xfff2c4, 2, 3); glow.position.copy(lp); scene.add(glow);
+  }
+  renderer.toneMappingExposure = S.exposure;
+  camera.position.set(...S.cam);
+  const controls = new OrbitControls(camera, canvas); controls.target.copy(M0.look); controls.enableDamping = true; controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.update();
+  return { id, S, scene, camera, controls, water, model: M0 };
+}
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); if (state) { state.camera.aspect = w / h; state.camera.updateProjectionMatrix(); } }
+function show(id) {
+  if (state) state.controls.dispose();
+  state = build(id); resize();
+  document.querySelectorAll('[data-m]').forEach((b) => b.classList.toggle('on', b.dataset.m === id));
+}
+let t0 = performance.now();
+renderer.setAnimationLoop(() => {
+  if (!state) return;
+  const t = (performance.now() - t0) / 1000;
+  state.water.material.uniforms.time.value = t * 0.6;
+  state.controls.update();
+  renderer.render(state.scene, state.camera);
+});
+addEventListener('resize', resize);
+document.querySelectorAll('[data-m]').forEach((b) => b.addEventListener('click', () => show(b.dataset.m)));
+
+// ---------- 사진(JPG) 만들기: 고해상도 렌더 + 비네팅·필름 그레인 + 표시 문구 ----------
+const LABEL = { a: '모델 A 인명구조형', b: '모델 B 해양관측형', c: '모델 C 저가 소모형 플랫폼', d: '모델 D 국가중요시설 감시·정찰형' };
+async function photo(w = 1920, h = 1200) {
+  const prev = renderer.getSize(new THREE.Vector2()), pr = renderer.getPixelRatio();
+  renderer.setPixelRatio(1); renderer.setSize(w, h, false); state.camera.aspect = w / h; state.camera.updateProjectionMatrix();
+  for (let i = 0; i < 3; i++) renderer.render(state.scene, state.camera);
+  const out = document.createElement('canvas'); out.width = w; out.height = h; const x = out.getContext('2d');
+  x.filter = state.id === 'd' ? 'saturate(1.25) contrast(1.1)' : 'saturate(1.45) contrast(1.1) brightness(1.03)'; x.drawImage(renderer.domElement, 0, 0); x.filter = 'none';
+  x.globalCompositeOperation = 'soft-light'; const cg = x.createLinearGradient(0, 0, 0, h); cg.addColorStop(0, (state.id === 'a' || state.id === 'b') ? 'rgba(90,150,255,0.35)' : 'rgba(255,214,170,0.25)'); cg.addColorStop(0.55, 'rgba(0,0,0,0)'); cg.addColorStop(1, 'rgba(0,70,140,0.45)'); x.fillStyle = cg; x.fillRect(0, 0, w, h); x.globalCompositeOperation = 'source-over';
+  const vg = x.createRadialGradient(w / 2, h * 0.48, h * 0.35, w / 2, h * 0.48, h * 0.95); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.38)'); x.fillStyle = vg; x.fillRect(0, 0, w, h);
+  const img = x.getImageData(0, 0, w, h), d = img.data; for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - 0.5) * 9; d[i] += n; d[i + 1] += n; d[i + 2] += n; } x.putImageData(img, 0, 0);
+  x.font = '22px "Malgun Gothic", sans-serif'; x.fillStyle = 'rgba(255,255,255,0.78)'; x.fillText(`가상 프로토타입 · 3D 렌더링(실물 아님) · ${LABEL[state.id]}`, 30, h - 30);
+  renderer.setPixelRatio(pr); renderer.setSize(prev.x, prev.y, false); resize();
+  return await new Promise((r) => out.toBlob(r, 'image/jpeg', 0.9));
+}
+window.__photo = photo;
+window.__show = show;
+document.getElementById('save').addEventListener('click', async () => {
+  const b = await photo(); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `model-${state.id}.jpg`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+});
+show(Q.get('model') || 'a');
+window.__ready = true;
+</script>
+</body></html>
